@@ -53,13 +53,13 @@ Use EBI Clustalo https://www.ebi.ac.uk/Tools/msa/clustalo/
 
 ### Multiple sequence alignment of mcr seed sequences.
 
-![Multiple sequence alignment of mcr seed sequences.](https://github.com/rotheconrad/ROCker_Macrolide_Models/01_mcr/00_figures/00a_mcr_SeedSeqs_msa.png)
+![Multiple sequence alignment of mcr seed sequences.](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/01_mcr/00_figures/00a_mcr_SeedSeqs_msa.png)
 
 Multiple sequence alignment image produced with AliView highlighting majority rule concensus characters.
 
 ### Neighbor joining phylogenetic tree of mcr seed sequences.
 
-![Neighbor joining phylogenetic tree of mcr seed sequences.](https://github.com/rotheconrad/ROCker_Macrolide_Models/01_mcr/00_figures/00b_mcr_SeedSeqs_tree.png)
+![Neighbor joining phylogenetic tree of mcr seed sequences.](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/01_mcr/00_figures/00b_mcr_SeedSeqs_tree.png)
 
 Neighbor joining phylogenetic tree image produced with FigTree default settings.
 
@@ -69,7 +69,7 @@ Neighbor joining phylogenetic tree image produced with FigTree default settings.
 python /ROCkIn/02_Python/00a_PIM_clustered_heatmap.py -i mcr_SeedSeqs.faa.aln.pim -o mcr_SeedSeqs.faa.aln.pim.pdf
 ```
 
-![Multiple sequence alignment of mcr seed sequences.](https://github.com/rotheconrad/ROCker_Macrolide_Models/01_mcr/00_figures/00c_mcr_SeedSeqs_pim.png)
+![Multiple sequence alignment of mcr seed sequences.](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/01_mcr/00_figures/00c_mcr_SeedSeqs_pim.png)
 
 Neighbor joining phylogenetic tree image produced with FigTree default settings.
 
@@ -171,7 +171,7 @@ cat 00a_log/02b_BlastP.out
 - Number of duplicate blast matches passing filter to remove: 43451
 - Number of best hit entries written to new file: 5427 
 
-![Diagnostic histograms of sequence search results](https://github.com/rotheconrad/ROCker_Macrolide_Models/01_mcr/00_figures/02a_diagnostic_histograms.png)
+![Diagnostic histograms of sequence search results](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/01_mcr/00_figures/02a_diagnostic_histograms.png)
 
 ## c. Dereplicate - similar sequence clustering with MMSeqs2
 
@@ -357,9 +357,9 @@ python ../ROCkIn/02_Python/03c_Plot_Annotated_Tree_v2.py -a 03_ROCkIn_Results/03
 python ../ROCkIn/02_Python/03c_Plot_Annotated_Tree_v2.py -a 03_ROCkIn_Results/03i_Gene_Data_secRep_90_annotated.tsv -n 03_ROCkIn_Results/03c_mmseq90_secReps.treefile -o 03_ROCkIn_Results/03i_Predicted_Clades_Tree_secRep_90.pdf
 ```
 
-![Training set tree](https://github.com/rotheconrad/ROCker_Macrolide_Models/01_mcr/00_figures/03a_training_set_tree.png)
+![Training set tree](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/01_mcr/00_figures/03a_training_set_tree.png)
 
-![Testing set tree](https://github.com/rotheconrad/ROCker_Macrolide_Models/01_mcr/00_figures/03b_training_set_tree.png)
+![Testing set tree](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/01_mcr/00_figures/03b_training_set_tree.png)
 
 Review the Data Table and the Phylogenetic tree to make positive and negative UniProt ID selections to give to ROCkOut. Clade/Cluster labels can be changed in the tsv file and the tree can be replotted.
 
