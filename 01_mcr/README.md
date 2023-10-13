@@ -10,12 +10,12 @@ mcr genes enocde an LPS-modifying enzyme and are mobilized on a variety of plasm
 
 # Table of Contents
 
-1. [Step 00: Curate starting sequences](#Step-00-curate-starting-sequences)
-1. [Step 01: UniProt sequence search](#Step-01-uniprot-sequence-search)
-1. [Step 02: Deduplicate, filter, dereplicate](#Step-02-deduplicate,-filter,-dereplicate)
-1. [Step 03: Build Phylogenetic tree and predict clades](#Step-03-build-phylogenetic-tree-and-predict-clades)
-1. [Step 04: Build ROCker models](Step-04-build-rocker-models)
-1. [Step 05: Test ROCker models](Step-05-test-rocker-models)
+1. [Step 00: Curate starting sequences](#step-00-curate-starting-sequences)
+1. [Step 01: UniProt sequence search](#step-01-uniprot-sequence-search)
+1. [Step 02: Deduplicate, filter, dereplicate](#step-02-deduplicate,-filter,-dereplicate)
+1. [Step 03: Build Phylogenetic tree and predict clades](#step-03-build-phylogenetic-tree-and-predict-clades)
+1. [Step 04: Build ROCker models](#step-04-build-rocker-models)
+1. [Step 05: Test ROCker models](#step-05-test-rocker-models)
 
 # Step 00: Curate starting sequences
 
