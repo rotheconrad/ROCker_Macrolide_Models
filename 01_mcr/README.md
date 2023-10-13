@@ -21,7 +21,7 @@ mcr genes enocde an LPS-modifying enzyme and are mobilized on a variety of plasm
 
 Curate starting sequences. Source from NCBI's refgene database.
 
-## a. Find and retrieve sequences (May 24th, 2023)
+### a. Find and retrieve sequences (May 24th, 2023)
 
 There are 10 classes of mcr genes (mcr-1 thru mcr-10) with multiple squence variants (alleles) per class. They are designated as mcr 1.1, mcr 1.2, mcr 2.1, mcr 2.2, and etc.
 
@@ -38,7 +38,7 @@ I retrieved the uniprot amino acid sequence for eptA from Ecoli (P30845|EPTA_ECO
 
 Download fasta sequences and rename files. Collect the set of renamed fasta formatted sequences into a single file for amino acid sequence. These are referred to as the curated or reference sequences (mcr_SeedSeqs.faa)
 
-## b. Explore sequence diversity
+### b. Explore sequence diversity
 
 Use EBI Clustalo https://www.ebi.ac.uk/Tools/msa/clustalo/ 
 
@@ -51,19 +51,19 @@ Use EBI Clustalo https://www.ebi.ac.uk/Tools/msa/clustalo/
 1. Select result summary tab.
 1. Download the pim file (PIM) for the percent identity matrix.
 
-### Multiple sequence alignment of mcr seed sequences.
+#### Multiple sequence alignment of mcr seed sequences.
 
 ![Multiple sequence alignment of mcr seed sequences.](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/01_mcr/00_figures/00a_mcr_SeedSeqs_msa.png)
 
 Multiple sequence alignment image produced with AliView highlighting majority rule concensus characters.
 
-### Neighbor joining phylogenetic tree of mcr seed sequences.
+#### Neighbor joining phylogenetic tree of mcr seed sequences.
 
 ![Neighbor joining phylogenetic tree of mcr seed sequences.](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/01_mcr/00_figures/00b_mcr_SeedSeqs_tree.png)
 
 Neighbor joining phylogenetic tree image produced with FigTree default settings.
 
-### Percent sequence identity matrix hierarchical clustered heatmap of mcr seed sequences.
+#### Percent sequence identity matrix hierarchical clustered heatmap of mcr seed sequences.
 
 ```bash
 python /ROCkIn/02_Python/00a_PIM_clustered_heatmap.py -i mcr_SeedSeqs.faa.aln.pim -o mcr_SeedSeqs.faa.aln.pim.pdf
@@ -73,7 +73,7 @@ python /ROCkIn/02_Python/00a_PIM_clustered_heatmap.py -i mcr_SeedSeqs.faa.aln.pi
 
 Neighbor joining phylogenetic tree image produced with FigTree default settings.
 
-## c. Review data and make selections
+### c. Review data and make selections
 
 Review the multiple alignment and/or phylogenetic tree and/or heatmap and select representative sequences (i.e., remove highly similar sequences). We will use these curated sequences for a sequence search in uniprot and will not gain anything from sequences that are too similar (i.e. ≥ 90% sequence identity or one sequence from each strongly formed clade).
 
@@ -89,7 +89,7 @@ This is to look for extended sequence diversity.
 mkdir 00a_log 01a_ebi_blast 01b_ebi_dat 01c_ebi_fasta
 ```
 
-## a. search uniprot database
+### a. search uniprot database
 
 This step returns UniProt IDs for blast sequence matches.
 
@@ -100,7 +100,7 @@ sbatch --export fasta=mcr_SeedSeqs.faa /ROCkIn/01b_Sbatch/01a_ebi_blast.sbatch
 mv *.txt 01a_ebi_blast/
 ```
 
-## b. retrieve fasta files for matches
+### b. retrieve fasta files for matches
 
 This step downloads the .dat file for each BLAST sequence match from EBI using dbfetch.
 
@@ -125,7 +125,7 @@ grep -c '>' 01d_mcr_all_ebi_matches.fa
 
 # Step 02: Deduplicate, filter, dereplicate
 
-## a. Deduplicate
+### a. Deduplicate
 
 Since we have multiple verified sequences that we searched to UniProt, we likely have found overlapping search results. Concatenate fasta files of all search result sequences and deduplicate by UniProt ID. I wrote a Python script to deduplicate the concatenated fasta
 
@@ -139,7 +139,7 @@ python /ROCkIn/02_Python/02a_Remove_Duplicate_Fasta_Entries.py -f 01d_mcr_all_eb
 - Duplicates Removed: 7640
 - Unique sequences retained: 5427
 
-## b. Filter
+### b. Filter
 
 The initial sequence search does not have great options to filter the matches that are returned. As such, it usually returns many spurious matches.
 
@@ -173,7 +173,7 @@ cat 00a_log/02b_BlastP.out
 
 ![Diagnostic histograms of sequence search results](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/01_mcr/00_figures/02a_diagnostic_histograms.png)
 
-## c. Dereplicate - similar sequence clustering with MMSeqs2
+### c. Dereplicate - similar sequence clustering with MMSeqs2
 
 5427 sequences is way more than we need. Let's dereplicate the set some.
 
@@ -189,7 +189,7 @@ grep -c '>' 02c_dereplicate_90/02_mmseqs_reps.fasta
 
 - Representative sequences retained: 1458
 
-## d. Select secondary cluster representatives to create a *Testing set*
+### d. Select secondary cluster representatives to create a *Testing set*
 
 mmseqs outputs a fasta file of cluster representatives which we will make our selection from for model training. We also want a secondary set of sequences/IDs to use for model testing. This step selects those secondary references (secReps). Additionally, some genomes may have more than one gene with similar sequence to the target gene function. This script also selects any other genes from our pool of sequence matches that belong to a representative sequence genome or a secondary sequence genome and includes them as well. This prevents a hassel downstream when building the model and discovering non_target sequences overlapping with the target sequences.
 
@@ -209,7 +209,7 @@ grep -c '>' 02d_secReps_testSets/02f_mmseq90_secReps.fa
 
 - Secondary representative sequences retained: 473
 
-### We now have fasta files for two sets of sequences:
+#### We now have fasta files for two sets of sequences:
 
 1. The *Training set* 02_mmseqs_reps.fasta
 1. The *Testing set*  02f_mmseq90_secReps.fa 
@@ -218,7 +218,7 @@ grep -c '>' 02d_secReps_testSets/02f_mmseq90_secReps.fa
 
 Now that we have a duplicated, filtered, and dereplicated set of similar sequences, lets build a tree, predict some clades and build a nice data table to work from.
 
-## a. Multiple Sequence Alignment (MSA)
+### a. Multiple Sequence Alignment (MSA)
 
 There are several good tools for this, here I use clustal omega.
 
@@ -247,7 +247,7 @@ grep -c '>' 03_ROCkIn_Results/03a_mmseq90_secReps.fa.aln
 - Sequences before trimming: 1473 (1458 searched + 15 SeedSeqs)
 - Sequences before trimming: 488 (473 searched + 15 SeedSeqs)
 
-## b. trim
+### b. trim
 
 trim the alignment with trimmal. The trimming can also be completed manually but I prefer trimal for removing columns and general clean up. I remove sequences with obviously bad alignments manually.
 
@@ -255,19 +255,19 @@ Before building a phylogenetic tree, MSAs should be cleaned to removed spurious 
 
 Before using trimmal, it is good to review the MSA and remove (or at least flag) any obvious sequences that don't belong such as 1 or a few really long sequences or 1 or a few sequences that induce large gaps. Trimmal is pretty good at catching these and removing them, but it doesn't always remove them - sometimes it just trims them and then it is more difficult to see that they don't fit in well with the other sequences. This won't affect the tree building so much as it will show up in the ROCker model.
 
-### Reviewing the MSA, the following sequences are all too long.
+#### Reviewing the MSA, the following sequences are all too long.
 
 - check beginning and end of alignment for outliers and consider removing them.
 - check large gaps in the alignment to see if only 1 or a few sequences are responsible for creating the gap and consider removing them.
 
-#### training set Removed the following prior to trimming: too long or bad alignment
+##### training set Removed the following prior to trimming: too long or bad alignment
 - A0A077Z953_TRITR//Probable transcriptional regulator ycf27//Trichuris trichiura (Whipworm) (Trichocephalus trichiurus)//Unreviewed//Eukaryota;Metazoa;Ecdy
 - Q7VH02_HELHP//Phosphatidic acid phosphatase type 2/haloperoxidase domain-containing protein//Helicobacter hepaticus (strain ATCC 51449 / 3B1)//Unreviewed/
 - A0A7Z7MUD9_9PROT//Membrane-associated, metal-dependent hydrolase (Modular protein)//Sterolibacterium denitrificans//Unreviewed//Bacteria;Pseudomonadota;Betaproteobact
 A0A4Q3HK81_9HYPH//Phosphoethanolamine transferase//Hyphomicrobiales bacterium//Unreviewed//Bacteria;Pseudomonadota;Alphaproteobacteria;Hyphomicrobiales
 - A0A1H9NI52_9PSED//Lipid A ethanolaminephosphotransferase//Pseudomonas sp. NFACC02//Unreviewed//Bacteria;Pseudomonadota;Gammaproteobacteria;Pseudomonada
 
-#### testing set Removed the following prior to trimming: too long or bad alignment
+##### testing set Removed the following prior to trimming: too long or bad alignment
 - A0A0S4PZP7_9HELI//Phosphatidic acid phosphatase type 2/haloperoxidase domain-containing protein//Helicobacter typhlonius//Unreviewed//Bacteria;Pseudomonadota;
 
 ```bash
@@ -289,7 +289,7 @@ grep -c '>' 03_ROCkIn_Results/03b_mmseq90_secReps.trimmed.aln
 - Training set sequences after trimming: 1471
 - Testing set sequences after trimming: 480
 
-## c. clean up seq names for clean tree leaves
+### c. clean up seq names for clean tree leaves
 
 clean up sequence names for the tree.
 
@@ -301,7 +301,7 @@ python /ROCkIn/02_Python/03a_clean_seq_names.py -i 03_ROCkIn_Results/03b_mmseqs_
 python /ROCkIn/02_Python/03a_clean_seq_names.py -i 03_ROCkIn_Results/03b_mmseq90_secReps.trimmed.aln
 ```
 
-## d. build phylogenetic tree
+### d. build phylogenetic tree
 
 Build bootstrapped ML phylogenetic tree with IQTree
 
@@ -313,7 +313,7 @@ sbatch --export input=03_ROCkIn_Results/03b_mmseqs_reps_90.trimmed.aln,outpre=03
 sbatch --export input=03_ROCkIn_Results/03b_mmseq90_secReps.trimmed.aln,outpre=03_ROCkIn_Results/03c_mmseq90_secReps /ROCkIn/01b_Sbatch/03c_IQTree.sbatch
 ```
 
-## e. Create annotated tsv and phylogenetic tree PDF
+### e. Create annotated tsv and phylogenetic tree PDF
 
 create annotated tsv file to explore clades.
 
@@ -429,7 +429,7 @@ We test 4 different read lengths for each model.
 
 Scripts for this section are in the 00_scripts directory of this GitHub Repo. Scripts for all previous sections were from either the ROCkIn or ROCkOut repos.
 
-## a. Run mock metagenomes against models using ROCkOut
+### a. Run mock metagenomes against models using ROCkOut
 
 ```bash
 # mcrAll model
@@ -459,7 +459,7 @@ sbatch --export infile=../02b_mcr1_test/simulated_reads/simread_250_raw_reads.fa
 sbatch --export infile=../02b_mcr1_test/simulated_reads/simread_300_raw_reads.fasta,model=model,outpre=test_score_300 ../../00b_sbatch/ROCkOut_score.sbatch
 ```
 
-# b. Create and search custom HMM model
+### b. Create and search custom HMM model
 
 Use [HMMER](http://hmmer.org/) to build a model from the multiple alignment created by ROCkOut. This multiple alignment is the same genes and alignment ROCkOut uses to create it's model, so we use it to create an HMM model for comparison.
 
@@ -578,7 +578,7 @@ python 00_scripts/besthit_filter_hmm.py -i test_score_300/mcr1-final_hmmSearch_3
 - Number of duplicate hmm matches: 4
 - Number of best hit entries written to new file: 11698 
 
-# c. Compile, score, and plot results
+### c. Compile, score, and plot results
 
 input rockout score results and hmm results and build bar plot.
 
@@ -685,7 +685,7 @@ python 00_scripts/score_rocker_model.py -mm ../02b_mcr1_test/simulated_reads/sim
 - Positive read count from hmmsearch: 5089
 - Positive reads not aligned by hmmsearch: 571
 
-# d. Positive read count sanity check
+### d. Positive read count sanity check
 
 This section was performed during the development of ROCkOut but may still serve useful those with extra curiosity.
 
@@ -736,7 +736,7 @@ python 00_scripts/00c_scripts/investigate_pos_read_discrepancy.py -mm ../01b_mcr
 
 There are plots too. I'll put some examples. This section and plots have mainly been to double check ROCkOut and track down discrepencies ect. during development.
 
-## e. Verify TP FP TN FN labels and scoring analysis (additional visuals)
+### e. Verify TP FP TN FN labels and scoring analysis (additional visuals)
 
 The score_rocker_model.py script writes out a fasta directory with file names labeled for filter method and failed, passed, TP, FP, TN, or FN.
 
@@ -817,13 +817,13 @@ python 00_scripts/alignment_label_test.py -bn 01a_alignments/simread_300_raw_rea
 
 This creates a lot of figures. I'll put some of them here and I'll put the rest in their own directory of the GitHub repo. I've ran this a few times already during the development of ROCkOut but I'll wait to put the final ones here once Kenji has the code all sorted.
 
-## f. Build pie trees with pplacer and itol.
+### f. Build pie trees with pplacer and itol.
 
 ROCkOut already includes a place function. This step is really just retrieve the right file and using the [iTol](https://itol.embl.de/) website.
 
 I'll put the figure here once I have the final ROCkOut results after Kenji and I get the code sorted.
 
-## g. Make final phylogenetic tree figure
+### g. Make final phylogenetic tree figure
 
 1. We want to create a nice phylogenetic tree for the publication figure
 2. ROCkOut isn't able to retrieve complete data for all input UniProt IDs so we want to create the phylogenetic tree from only the sequences ROCkOut is able to use to build the model.
