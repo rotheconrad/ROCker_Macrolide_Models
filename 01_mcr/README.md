@@ -155,7 +155,7 @@ The script also plots histograms of each parameter post filtering and can be rer
 
 I wrapped it into an sbatch script. This step produces the 02b_filter output directory containing the filtered tabular BLAST output file 02b_mcr_matches_fltrdBstHts.fa which is used downstream. It also contains several diagnostic histograms which provide a visual representation of the sequence search results and can be used to modify the filtering settings if necessary.
 
-The 02b_filter output directory also contains the file 02b_mph_matches_pID100_list.txt. This file is used to identify UniProt IDs that have 100% Sequence Similarity with the SeedSeqs. The input to ROCkOut is UniProt IDs but we retrieved our SeedSeqs from NCBI. We use this file to select 1 UniProt ID for each SeedSeq to include in the *Training* set list.
+The 02b_filter output directory also contains the file 02b_mph_matches_pID100_list.txt. This file is used to identify UniProt IDs that have 100% Sequence Similarity with the SeedSeqs. The input to ROCkOut is UniProt IDs but we retrieved our SeedSeqs from NCBI. We use this file to select 1 UniProt ID for each SeedSeq to include in the *Training set* set list.
 
 ```bash
 sbatch --export ref=mcr_SeedSeqs.faa,qry=02a_mcr_matches_dedup.fa,out=02b_mcr_matches /ROCkIn/01b_Sbatch/02b_Blastp.sbatch
@@ -177,7 +177,7 @@ cat 00a_log/02b_BlastP.out
 
 5427 sequences is way more than we need. Let's dereplicate the set some.
 
-Use mmseqs to generate sequence clusters of 90% amino acid sequence similarity and select cluster representatives. These representative sequences are used for the *Training* set sequences to build the ROCker models with ROCkOut.
+Use mmseqs to generate sequence clusters of 90% amino acid sequence similarity and select cluster representatives. These representative sequences are used for the *Training set* set sequences to build the ROCker models with ROCkOut.
 
 ```bash
 sbatch --export infile=02b_mcr_matches_fltrdBstHts.fa,oDir=02c_dereplicate_90,ss=90 ../ROCkIn/01b_Sbatch/02c_mmseqs.sbatch
@@ -189,7 +189,7 @@ grep -c '>' 02c_dereplicate_90/02_mmseqs_reps.fasta
 
 - Representative sequences retained: 1458
 
-## d. Select secondary cluster representatives to create a *Testing* set
+## d. Select secondary cluster representatives to create a *Testing set*
 
 mmseqs outputs a fasta file of cluster representatives which we will make our selection from for model training. We also want a secondary set of sequences/IDs to use for model testing. This step selects those secondary references (secReps). Additionally, some genomes may have more than one gene with similar sequence to the target gene function. This script also selects any other genes from our pool of sequence matches that belong to a representative sequence genome or a secondary sequence genome and includes them as well. This prevents a hassel downstream when building the model and discovering non_target sequences overlapping with the target sequences.
 
@@ -211,8 +211,8 @@ grep -c '>' 02d_secReps_testSets/02f_mmseq90_secReps.fa
 
 ### We now have fasta files for two sets of sequences:
 
-1. The *Training* set 02_mmseqs_reps.fasta
-1. The *Testing* set 02f_mmseq90_secReps.fa 
+1. The *Training set* 02_mmseqs_reps.fasta
+1. The *Testing set*  02f_mmseq90_secReps.fa 
 
 # Step 03: Build Phylogenetic tree and predict clades
 
@@ -357,8 +357,10 @@ python ../ROCkIn/02_Python/03c_Plot_Annotated_Tree_v2.py -a 03_ROCkIn_Results/03
 python ../ROCkIn/02_Python/03c_Plot_Annotated_Tree_v2.py -a 03_ROCkIn_Results/03i_Gene_Data_secRep_90_annotated.tsv -n 03_ROCkIn_Results/03c_mmseq90_secReps.treefile -o 03_ROCkIn_Results/03i_Predicted_Clades_Tree_secRep_90.pdf
 ```
 
+#### Training set - clade/cluster labeled tree
 ![Training set tree](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/01_mcr/00_figures/03a_training_set_tree.png)
 
+#### Testing set - clade/cluster labeled tree
 ![Testing set tree](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/01_mcr/00_figures/03b_training_set_tree.png)
 
 Review the Data Table and the Phylogenetic tree to make positive and negative UniProt ID selections to give to ROCkOut. Clade/Cluster labels can be changed in the tsv file and the tree can be replotted.
