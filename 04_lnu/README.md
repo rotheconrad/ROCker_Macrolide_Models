@@ -1,13 +1,13 @@
-# Working notes for development of ROCker models for mcr genes
+# Working notes for development of ROCker models for lnu genes
 
-These notes contain the step-by-step details using ROCkIn and ROCkOut to curate training and testing sequence, to build the models, and to test the models for mobile colistin resistance genes. ROCkIn and ROCkOut and all their dependencies are required to reproduce the commands.
+These notes contain the step-by-step details using ROCkIn and ROCkOut to curate training and testing sequence, to build the models, and to test the models for lincosamide nucleotidyltransferase genes. ROCkIn and ROCkOut and all their dependencies are required to reproduce the commands.
 
-mcr = mobile colistin resistance genes
+lnu - lincosamide nucleotidyltransferase
+Previously named as linF linA etc.
 
-colistin (aka polymixin) resistance involves an L-Ara4N, 2-aminoethanol, or PEtN modification of lipid A. Several bacterial species have this ability as a response to certain external stimuli such as the eptA gene which shares sequence similarity with the mcr genes. Several spontaneous mutations have been documented that result in the same lipid A modification.
+Resistance to the lincosamide antibiotic by ATP-dependent modification of the 3' and/or 4'-hydroxyl groups of the methylthiolincosamide sugar.
 
-mcr genes enocde an LPS-modifying enzyme and are mobilized on a variety of plasmids. mcr-1 is primarily mobilized by an ISApl1 composite (IS30 family) transposon. The mcr-1 gene confers colistin resistance by encoding a phosphoethanolamine transferase that catalyzes the addition of a phosphoethanolamine moiety to lipid A in the bacterial outer membrane. MCR-1 confers resistance by modifying the colistin target, catalyzing transfer of phosphoethanolamine (PEA) onto the glucosamine saccharide of lipid A in the bacterial outer membrane. This reduces the net negative charge of the lipid A head group and, consequently, colistin binding.
-
+Lincosamides (e.g. lincomycin, clindamycin) are a class of drugs which bind to the 23s portion of the 50S subunit of bacterial ribosomes. This interaction inhibits early elongation of peptide chains by inhibiting the transpeptidase reaction, acting similarly to macrolides.
 # Table of Contents
 
 1. [Step 00: Curate starting sequences](#step-00-curate-starting-sequences)
@@ -21,22 +21,18 @@ mcr genes enocde an LPS-modifying enzyme and are mobilized on a variety of plasm
 
 Curate starting sequences. Source from NCBI's refgene database.
 
-### a. Find and retrieve sequences (May 24th, 2023)
+### a. Find and retrieve sequences (Oct 9th, 2023)
 
-There are 10 classes of mcr genes (mcr-1 thru mcr-10) with multiple squence variants (alleles) per class. They are designated as mcr 1.1, mcr 1.2, mcr 2.1, mcr 2.2, and etc.
+There are multiple classes of lnu gene: A, B, C, D, F, G, H.
 
-*note 3.30 allele missing from the consecutive order.*
-
-Search for mcr genes at ncbi refgene database returned 108 results
-https://www.ncbi.nlm.nih.gov/pathogens/refgene/#mcr
+Search for lnu genes at ncbi refgene database returned 23 results
+https://www.ncbi.nlm.nih.gov/pathogens/refgene/#lnu
 
 Use the Download button, select "Dataset (.zip)" from the drop down menu, and check the "Reference protein" box to download (reference_protein.faa)
 
-We also know that the eptA gene is a phosphoethanolamine transferase related to the mcr genes.
+Renamed fasta sequences with Sublime text editor find and replace regular expressions to create shorter format ex: >WP_000700648.1_LnuA_Bacteria
 
-I retrieved the uniprot amino acid sequence for eptA from Ecoli (P30845|EPTA_ECOLI, A0A0H3JML2|EPTA_ECO57), Helicobacter pylori (O24867|EPTA_HELPY) and Salmonella typhimurium (P36555|EPTA_SALTY) as well since the mcr's appear to come from eptA. based on literature and based on a first round of uniprot blast searches with the ncbi mcr refgenes.
-
-Download fasta sequences and rename files. Collect the set of renamed fasta formatted sequences into a single file for amino acid sequence. These are referred to as the curated or reference sequences (mcr_SeedSeqs.faa)
+Download fasta sequences and rename files. Collect the set of renamed fasta formatted sequences into a single file for amino acid sequence. These are referred to as the curated or reference sequences (lnu_SeedSeqs.faa)
 
 ### b. Explore sequence diversity
 
@@ -51,25 +47,25 @@ Use EBI Clustalo https://www.ebi.ac.uk/Tools/msa/clustalo/
 1. Select result summary tab.
 1. Download the pim file (PIM) for the percent identity matrix.
 
-#### Multiple sequence alignment of mcr seed sequences.
+#### Multiple sequence alignment of lnu seed sequences.
 
-![Multiple sequence alignment of mcr seed sequences.](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/04_lnu/00_figures/00a_mcr_SeedSeqs_msa.png)
+![Multiple sequence alignment of lnu seed sequences.](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/04_lnu/00_figures/00a_lnu_SeedSeqs_msa.png)
 
 Multiple sequence alignment image produced with AliView highlighting majority rule concensus characters.
 
-#### Neighbor joining phylogenetic tree of mcr seed sequences.
+#### Neighbor joining phylogenetic tree of lnu seed sequences.
 
-![Neighbor joining phylogenetic tree of mcr seed sequences.](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/04_lnu/00_figures/00b_mcr_SeedSeqs_tree.png)
+![Neighbor joining phylogenetic tree of lnu seed sequences.](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/04_lnu/00_figures/00b_lnu_SeedSeqs_tree.png)
 
 Neighbor joining phylogenetic tree image produced with FigTree default settings.
 
-#### Percent sequence identity matrix hierarchical clustered heatmap of mcr seed sequences.
+#### Percent sequence identity matrix hierarchical clustered heatmap of lnu seed sequences.
 
 ```bash
-python /ROCkIn/02_Python/00a_PIM_clustered_heatmap.py -i mcr_SeedSeqs.faa.aln.pim -o mcr_SeedSeqs.faa.aln.pim.pdf
+python /ROCkIn/02_Python/00a_PIM_clustered_heatmap.py -i lnu_SeedSeqs.faa.aln.pim -o lnu_SeedSeqs.faa.aln.pim.pdf
 ```
 
-![Multiple sequence alignment of mcr seed sequences.](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/04_lnu/00_figures/00c_mcr_SeedSeqs_pim.png)
+![Multiple sequence alignment of lnu seed sequences.](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/04_lnu/00_figures/00c_lnu_SeedSeqs_pim.png)
 
 Neighbor joining phylogenetic tree image produced with FigTree default settings.
 
@@ -77,11 +73,13 @@ Neighbor joining phylogenetic tree image produced with FigTree default settings.
 
 Review the multiple alignment and/or phylogenetic tree and/or heatmap and select representative sequences (i.e., remove highly similar sequences). We will use these curated sequences for a sequence search in uniprot and will not gain anything from sequences that are too similar (i.e. ≥ 90% sequence identity or one sequence from each strongly formed clade).
 
-Create a new fasta file with selected representative sequences (mcr_SeedSeqs.faa). In this case I've selected the first allele for mcr-1 thru mcr-10 (mcr-1.1, etc.) as well as mcr-3.8, 3.17, EPTA_HELPY, EPTA_SALTY, and EPTA_ECOLI.
+The lnu genes have a clear bifurcation into two divergent clades with <30% amino acid sequence identity shared between them. We chose to focus on the clade containing lnuF and so we discarded the lnuA, lnuE, lnuC, lnuD, lnuP, and lnuAN2 sequences removing them from the remainder of the analysis and model building. Our lnu model will focus on the lnu clade with the lnuF, lnuB, lnuG, and lnuH sequences.
+
+Create a new fasta file with selected representative sequences (NCBI_lnu_reps.faa). See file for selection. Using NCBI_lnu_proteins.faa.pim.pdf, I selected 3 lnuF sequences, 1 lnuB sequence, and the lnuG, and lnuH sequences.
 
 # Step 01: UniProt sequence search
 
-Run a search of the curated mcr sequences (RefSeqs) against the UniProt database.
+Run a search of the curated lnu sequences (RefSeqs) against the UniProt database.
 This is to look for extended sequence diversity.
 
 ```bash
@@ -94,7 +92,7 @@ mkdir 00a_log 01a_ebi_blast 01b_ebi_dat 01c_ebi_fasta
 This step returns UniProt IDs for blast sequence matches.
 
 ```bash
-sbatch --export fasta=mcr_SeedSeqs.faa /ROCkIn/01b_Sbatch/01a_ebi_blast.sbatch
+sbatch --export fasta=lnu_SeedSeqs.faa /ROCkIn/01b_Sbatch/01a_ebi_blast.sbatch
 
 # move files into folder to keep clean organization
 mv *.txt 01a_ebi_blast/
@@ -113,15 +111,15 @@ for f in 01a_ebi_blast/*; do odir='01b_ebi_dat'; gene=`basename $f | cut -d. -f1
 for d in 01b_ebi_dat/*; do n=`basename $d`; echo $n; python ../ROCkIn/02_Python/01d_parse_dat_file.py -i $d -o 01c_ebi_fasta/${n}.fasta; done
 
 # concatenate gene fastas into single fasta file
-cat 01c_ebi_fasta/*.fasta >> 01d_mcr_all_ebi_matches.fa
+cat 01c_ebi_fasta/*.fasta >> 01d_lnu_all_ebi_matches.fa
 
 # count 'em
-grep -c '>' 01d_mcr_all_ebi_matches.fa
+grep -c '>' 01d_lnu_all_ebi_matches.fa
 ```
 
 **Results:**
 
-- 13,067 fasta sequences returned from blast search
+- 5,615 fasta sequences returned from blast search
 
 # Step 02: Deduplicate, filter, dereplicate
 
@@ -130,14 +128,14 @@ grep -c '>' 01d_mcr_all_ebi_matches.fa
 Since we have multiple verified sequences that we searched to UniProt, we likely have found overlapping search results. Concatenate fasta files of all search result sequences and deduplicate by UniProt ID. I wrote a Python script to deduplicate the concatenated fasta
 
 ```bash
-python /ROCkIn/02_Python/02a_Remove_Duplicate_Fasta_Entries.py -f 01d_mcr_all_ebi_matches.fa -o 02a_mcr_matches_dedup.fa
+python /ROCkIn/02_Python/02a_Remove_Duplicate_Fasta_Entries.py -f 01d_lnu_all_ebi_matches.fa -o 02a_lnu_matches_dedup.fa
 ```
 
 **Results:**
 
-- Total sequences in file: 13067
-- Duplicates Removed: 7640
-- Unique sequences retained: 5427
+- Total sequences in file: 5615
+- Duplicates Removed: 3936
+- Unique sequences retained: 1679
 
 ### b. Filter
 
@@ -153,25 +151,25 @@ This script outputs 100% sequence matches separately as well in tabular blast, f
 
 The script also plots histograms of each parameter post filtering and can be rerun with different filtering options if neccessary.
 
-I wrapped it into an sbatch script. This step produces the 02b_filter output directory containing the filtered tabular BLAST output file 02b_mcr_matches_fltrdBstHts.fa which is used downstream. It also contains several diagnostic histograms which provide a visual representation of the sequence search results and can be used to modify the filtering settings if necessary.
+I wrapped it into an sbatch script. This step produces the 02b_filter output directory containing the filtered tabular BLAST output file 02b_lnu_matches_fltrdBstHts.fa which is used downstream. It also contains several diagnostic histograms which provide a visual representation of the sequence search results and can be used to modify the filtering settings if necessary.
 
-The 02b_filter output directory also contains the file 02b_mph_matches_pID100_list.txt. This file is used to identify UniProt IDs that have 100% Sequence Similarity with the SeedSeqs. The input to ROCkOut is UniProt IDs but we retrieved our SeedSeqs from NCBI. We use this file to select 1 UniProt ID for each SeedSeq to include in the *Training set* set list.
+The 02b_filter output directory also contains the file 02b_lnu_matches_pID100_list.txt. This file is used to identify UniProt IDs that have 100% Sequence Similarity with the SeedSeqs. The input to ROCkOut is UniProt IDs but we retrieved our SeedSeqs from NCBI. We use this file to select 1 UniProt ID for each SeedSeq to include in the *Training set* set list.
 
 ```bash
-sbatch --export ref=mcr_SeedSeqs.faa,qry=02a_mcr_matches_dedup.fa,out=02b_mcr_matches /ROCkIn/01b_Sbatch/02b_Blastp.sbatch
+sbatch --export ref=lnu_SeedSeqs.faa,qry=02a_lnu_matches_dedup.fa,out=02b_lnu_matches /ROCkIn/01b_Sbatch/02b_Blastp.sbatch
 
 cat 00a_log/02b_BlastP.out
 ```
 
 **Results:**
 
-- Total number of entries in blast file: 55073
-- Number of entries failing the filters: 6195
-- Number of entries passing the filters: 48878
-- Number of duplicate blast matches passing filter to remove: 43451
-- Number of best hit entries written to new file: 5427 
+- Total number of entries in blast file: 11457
+- Number of entries failing the filters: 8781
+- Number of entries passing the filters: 2676
+- Number of duplicate blast matches passing filter to remove: 2092
+- Number of best hit entries written to new file: 584
 
-![Diagnostic histograms of sequence search results](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/04_lnu/00_figures/02a_diagnostic_histograms.png)
+![Diagnostic histograms of sequence search results](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/04_lnu/00_figures/02a_lnu_diagnostic_histograms.png)
 
 ### c. Dereplicate - similar sequence clustering with MMSeqs2
 
@@ -180,14 +178,14 @@ cat 00a_log/02b_BlastP.out
 Use mmseqs to generate sequence clusters of 90% amino acid sequence similarity and select cluster representatives. These representative sequences are used for the *Training set* set sequences to build the ROCker models with ROCkOut.
 
 ```bash
-sbatch --export infile=02b_mcr_matches_fltrdBstHts.fa,oDir=02c_dereplicate_90,ss=90 ../ROCkIn/01b_Sbatch/02c_mmseqs.sbatch
+sbatch --export infile=02b_lnu_matches_fltrdBstHts.fa,oDir=02c_dereplicate_90,ss=90 ../ROCkIn/01b_Sbatch/02c_mmseqs.sbatch
 
 grep -c '>' 02c_dereplicate_90/02_mmseqs_reps.fasta
 ```
 
 **Results:**
 
-- Representative sequences retained: 1458
+- Representative sequences retained: 269
 
 ### d. Select secondary cluster representatives to create a *Testing set*
 
@@ -196,7 +194,7 @@ mmseqs outputs a fasta file of cluster representatives which we will make our se
 By default a random seed is not set for this script so the secondary representative selection is chosen randomly from each cluster each time the script is rerun (excluding the primary cluster representative selected by mmseqs2). use the optional -s parameter to set a fixed seed for reproducible "random" selections.
 
 ```bash
-python ../ROCkIn/02_Python/02d_Get_Test_secReps.py -f 02b_mcr_matches_fltrdBstHts.fa -c 02c_dereplicate_90/02c_mmseqs_results_90.tsv -o 02f_mmseq90
+python ../ROCkIn/02_Python/02d_Get_Test_secReps.py -f 02b_lnu_matches_fltrdBstHts.fa -c 02c_dereplicate_90/02c_mmseqs_results_90.tsv -o 02f_mmseq90
 
 mkdir 02d_secReps_testSets
 
@@ -207,7 +205,7 @@ grep -c '>' 02d_secReps_testSets/02f_mmseq90_secReps.fa
 
 **Results:**
 
-- Secondary representative sequences retained: 473
+- Secondary representative sequences retained: 49
 
 #### We now have fasta files for two sets of sequences:
 
@@ -229,14 +227,14 @@ I put the commands into an sbatch script
 ```bash
 # training set
 
-sbatch --export verified=mcr_SeedSeqs.faa,newseqs=02c_dereplicate_90/02c_mmseqs_reps_90.fasta /ROCkIn/01b_Sbatch/03a_seq_alignment.sbatch
+sbatch --export verified=lnu_SeedSeqs.faa,newseqs=02c_dereplicate_90/02c_mmseqs_reps_90.fasta /ROCkIn/01b_Sbatch/03a_seq_alignment.sbatch
 
 # sequences before trimming
 grep -c '>' 03_ROCkIn_Results/03a_mmseqs_reps_90.fasta.aln
 
 # testing set
 
-sbatch --export verified=mcr_SeedSeqs.faa,newseqs=02d_secReps_testSets/02f_mmseq90_secReps.fa /ROCkIn/01b_Sbatch/03a_seq_alignment.sbatch
+sbatch --export verified=lnu_SeedSeqs.faa,newseqs=02d_secReps_testSets/02f_mmseq90_secReps.fa /ROCkIn/01b_Sbatch/03a_seq_alignment.sbatch
 
 # sequences before trimming
 grep -c '>' 03_ROCkIn_Results/03a_mmseq90_secReps.fa.aln
@@ -244,8 +242,8 @@ grep -c '>' 03_ROCkIn_Results/03a_mmseq90_secReps.fa.aln
 
 **Results:**
 
-- Sequences before trimming: 1473 (1458 searched + 15 SeedSeqs)
-- Sequences before trimming: 488 (473 searched + 15 SeedSeqs)
+- Training set sequences before trimming: 275 (269 searched + 6 curated)
+- Testing set sequences before trimming: 55 (49 searched + 6 curated)
 
 ### b. trim
 
@@ -260,15 +258,98 @@ Before using trimmal, it is good to review the MSA and remove (or at least flag)
 - check beginning and end of alignment for outliers and consider removing them.
 - check large gaps in the alignment to see if only 1 or a few sequences are responsible for creating the gap and consider removing them.
 
-##### training set Removed the following prior to trimming: too long or bad alignment
-- A0A077Z953_TRITR//Probable transcriptional regulator ycf27//Trichuris trichiura (Whipworm) (Trichocephalus trichiurus)//Unreviewed//Eukaryota;Metazoa;Ecdy
-- Q7VH02_HELHP//Phosphatidic acid phosphatase type 2/haloperoxidase domain-containing protein//Helicobacter hepaticus (strain ATCC 51449 / 3B1)//Unreviewed/
-- A0A7Z7MUD9_9PROT//Membrane-associated, metal-dependent hydrolase (Modular protein)//Sterolibacterium denitrificans//Unreviewed//Bacteria;Pseudomonadota;Betaproteobact
-A0A4Q3HK81_9HYPH//Phosphoethanolamine transferase//Hyphomicrobiales bacterium//Unreviewed//Bacteria;Pseudomonadota;Alphaproteobacteria;Hyphomicrobiales
-- A0A1H9NI52_9PSED//Lipid A ethanolaminephosphotransferase//Pseudomonas sp. NFACC02//Unreviewed//Bacteria;Pseudomonadota;Gammaproteobacteria;Pseudomonada
+##### training set Removed the following prior to trimming: too long, too short, or bad alignment
+- A0A3A5WST9_9BACE//Nucleotidyltransferase domain-containing protein//Bacteroides sp. AF34-31BH//Unreviewed//Bacteria;Bacteroidota;Bacteroidia;Bacteroidales;Bacteroidaceae;Bacteroides
+- A0A5P2ET54_9CLOT//Nucleotidyltransferase domain-containing protein//Clostridium diolis//Unreviewed//Bacteria;Bacillota;Clostridia;Eubacteriales;Clostridiaceae;Clostridium
+- A0A1G0WS67_9BACT//Nucleotidyltransferase//Ignavibacteria bacterium RIFOXYC2_FULL_35_21//Unreviewed//Bacteria;Ignavibacteriota;Ignavibacteria
+- A0A832DL39_9BACT//Nucleotidyltransferase domain-containing protein//Ignavibacterium album//Unreviewed//Bacteria;Ignavibacteriota;Ignavibacteria;Ignavibacteriales;Ignavibacteriaceae;Ignavibacterium
+- A0A349G9H8_9FIRM//Nucleotidyltransferase//Clostridiales bacterium UBA8960//Unreviewed//Bacteria;Bacillota;Clostridia;Eubacteriales;Eubacteriales;Family;XII;Incertae;Sedis
+- A0A8T4J2P5_9ACTN//Nucleotidyltransferase domain-containing protein//Streptomyces daliensis//Unreviewed//Bacteria;Actinomycetota;Actinomycetes;Kitasatosporales;Streptomycetaceae;Streptomyces
+- A0A0E9LST6_9BACT//Predicted nucleotidyltransferases//Geofilum rubicundum JCM 15548//Unreviewed//Bacteria;Bacteroidota;Bacteroidia;Marinilabiliales;Marinilabiliaceae;Geofilum
+- A0A350V2R4_UNCBA//Nucleotidyltransferase//Bacteroidota bacterium//Unreviewed//Bacteria;Bacteroidota
+- E1YM00_9BACT//Polymerase beta nucleotidyltransferase domain-containing protein//uncultured Desulfobacterium sp//Unreviewed//Bacteria;Thermodesulfobacteriota;Desulfobacteria;Desulfobacterales;Desulfobacteriaceae;Desulfobacterium;environmental;samples
+- A0A970V553_9BACT//Nucleotidyltransferase domain-containing protein//candidate division WS1 bacterium//Unreviewed//Bacteria;candidate;division;WS1
+- X1ARS9_9ZZZZ//Polymerase nucleotidyl transferase domain-containing protein//marine sediment metagenome//Unreviewed//unclassified;sequences;metagenomes;ecological;metagenomes
+- A0A662W4L5_9EURY//Nucleotidyltransferase//Archaeoglobales archaeon//Unreviewed//Archaea;Euryarchaeota;Archaeoglobi;Archaeoglobales
+- A0A1G1HVE5_9BACT//Polymerase nucleotidyl transferase domain-containing protein//Nitrospirae bacterium RBG_16_64_22//Unreviewed//Bacteria;Nitrospirota
+- A0A328CAL1_9DELT//Uncharacterized protein//Lujinxingia litoralis//Unreviewed//Bacteria;Deltaproteobacteria;Bradymonadales;Lujinxingiaceae;Lujinxingia
+- A0A2H0AI31_9DELT//Nucleotidyltransferase//Deltaproteobacteria bacterium CG23_combo_of_CG06-09_8_20_14_all_51_20//Unreviewed//Bacteria;Deltaproteobacteria
+- A0A9N7JZP7_TETHN//Lincosamide nucleotidyltransferase//NBRC 12172) (Pediococcus halophilus)//Unreviewed//Bacteria;Bacillota;Bacilli;Lactobacillales;Enterococcaceae;Tetragenococcus
+- A0A7Z7PM48_9BACT//Nudix hydrolase domain-containing protein//Mesotoga infera//Unreviewed//Bacteria;Thermotogota;Thermotogae;Kosmotogales;Kosmotogaceae;Mesotoga
+- A0A1C4E2C9_9BACI//Polymerase beta nucleotidyltransferase domain-containing protein//Bacillus wiedmannii//Unreviewed//Bacteria;Bacillota;Bacilli;Bacillales;Bacillaceae;Bacillus;Bacillus;cereus;group
+- A0A7L5DI87_9BACT//Nucleotidyltransferase domain-containing protein//Spirosoma rhododendri//Unreviewed//Bacteria;Bacteroidota;Cytophagia;Cytophagales;Cytophagaceae;Spirosoma
+- A0A4Y1ZH60_9BACL//Uncharacterized protein//Sporolactobacillus inulinus//Unreviewed//Bacteria;Bacillota;Bacilli;Bacillales;Sporolactobacillaceae;Sporolactobacillus
+- A0A3C2D8E3_9BACT//Polymerase nucleotidyl transferase domain-containing protein//Prolixibacteraceae bacterium//Unreviewed//Bacteria;Bacteroidota;Bacteroidia;Marinilabiliales;Prolixibacteraceae
+- A0A661AXG8_UNCXX//Nucleotidyltransferase domain-containing protein//bacterium//Unreviewed//Bacteria
+- A0A1S6J291_9ACTN//Uncharacterized protein//Streptomyces pactum//Unreviewed//Bacteria;Actinomycetota;Actinomycetes;Kitasatosporales;Streptomycetaceae;Streptomyces
+- A0A2S2FU38_9ACTN//Nucleotidyltransferase domain-containing protein//Streptomyces sp. SM17//Unreviewed//Bacteria;Actinomycetota;Actinomycetes;Kitasatosporales;Streptomycetaceae;Streptomyces
+- A0A4R0ZE44_9BACL//Nucleotidyltransferase domain-containing protein//Exiguobacterium sp. SH5S13//Unreviewed//Bacteria;Bacillota;Bacilli;Bacillales;Bacillales;Family;XII;Incertae;Sedis;Exiguobacterium
+- A0A7Z9WFY3_UNCSY//Nucleotidyltransferase domain-containing protein//Syntrophaceae bacterium//Unreviewed//Bacteria;Thermodesulfobacteriota;Syntrophia;Syntrophales;Syntrophaceae
+- A0A5M8QNQ9_9BACT//Nucleotidyltransferase domain-containing protein//Dyadobacter flavalbus//Unreviewed//Bacteria;Bacteroidota;Cytophagia;Cytophagales;Spirosomaceae;Dyadobacter
+- A0A4Y1ZGK0_9BACL//Polymerase beta nucleotidyltransferase domain-containing protein//Sporolactobacillus inulinus//Unreviewed//Bacteria;Bacillota;Bacilli;Bacillales;Sporolactobacillaceae;Sporolactobacillus
+- A0A2H6CW78_TETHA//Putative lincosamide nucleotidyltransferase//Tetragenococcus halophilus subsp. halophilus//Unreviewed//Bacteria;Bacillota;Bacilli;Lactobacillales;Enterococcaceae;Tetragenococcus
+- A0A937WPD0_UNCPO//Nucleotidyltransferase domain-containing protein//Poribacteria bacterium//Unreviewed//Bacteria;Candidatus;Poribacteria
+- A0A497NIV7_9ARCH//Nucleotidyltransferase domain-containing protein//Candidatus Bathyarchaeota archaeon//Unreviewed//Archaea;Candidatus;Bathyarchaeota
+- A0A958CG54_9CHLR//Nucleotidyltransferase domain-containing protein//Anaerolineae bacterium//Unreviewed//Bacteria;Chloroflexota;Anaerolineae
+- A0A971VH29_9BACT//Nucleotidyltransferase domain-containing protein//Bacteroidales bacterium//Unreviewed//Bacteria;Bacteroidota;Bacteroidia;Bacteroidales
+- A0A101I8I5_9BACT//LinF//Marinimicrobia bacterium 46_43//Unreviewed//Bacteria;Candidatus;Marinimicrobia
+- A0A101JMS4_9ACTN//DNA polymerase subunit beta//Actinoplanes awajinensis subsp. mycoplanecinus//Unreviewed//Bacteria;Actinomycetota;Actinomycetes;Micromonosporales;Micromonosporaceae;Actinoplanes
+- A0A972S7A6_9BACT//Polymerase beta nucleotidyltransferase domain-containing protein//Campylobacterota bacterium//Unreviewed//Bacteria;Campylobacterota
+- A0A7X3P1G3_UNCPO//Nucleotidyltransferase domain-containing protein//Poribacteria bacterium//Unreviewed//Bacteria;Candidatus;Poribacteria
+- A0A5J4L2W2_9ZZZZ//Polymerase beta nucleotidyltransferase domain-containing protein//hot springs metagenome//Unreviewed//unclassified;sequences;metagenomes;ecological;metagenomes
+- A0A3A0A7Q1_UNCCH//Nucleotidyltransferase domain-containing protein//Chloroflexota bacterium//Unreviewed//Bacteria;Chloroflexota
+- A0A7V2RQ93_UNCBA//DinB family protein//Bacteroidota bacterium//Unreviewed//Bacteria;Bacteroidota
+- A0A661UD38_UNCCO//Polymerase beta nucleotidyltransferase domain-containing protein//Coatesbacteria bacterium//Unreviewed//Bacteria;Candidatus;Coatesbacteria
+- A0A1W1WTW9_9BACT//Nucleotidyltransferase domain-containing protein//Nitratiruptor tergarcus DSM 16512//Unreviewed//Bacteria;Campylobacterota;Epsilonproteobacteria;Nautiliales;Nitratiruptoraceae;Nitratiruptor
+- A0A1M2ZI67_9SPHN//Uncharacterized protein//Sphingomonas sp. 66-10//Unreviewed//Bacteria;Pseudomonadota;Alphaproteobacteria;Sphingomonadales;Sphingomonadaceae;Sphingomonas
+- A0A419F9G8_9BACT//Nucleotidyltransferase domain-containing protein//Candidatus Abyssubacteria bacterium SURF_17//Unreviewed//Bacteria;Candidatus;Abyssubacteria
+- A0A1F9FX31_9DELT//Polymerase beta nucleotidyltransferase domain-containing protein//Deltaproteobacteria bacterium RIFCSPHIGHO2_02_FULL_44_16//Unreviewed//Bacteria;Deltaproteobacteria
+- A0A6N7MMI2_UNCBA//Nucleotidyltransferase domain-containing protein//Bacteroidota bacterium//Unreviewed//Bacteria;Bacteroidota
+- A0A1I5RY18_9BACT//Nucleotidyltransferase domain-containing protein//Pseudarcicella hirudinis//Unreviewed//Bacteria;Bacteroidota;Cytophagia;Cytophagales;Spirosomaceae;Pseudarcicella
+- A0A660YE10_UNCLA//Nucleotidyltransferase domain-containing protein//Latescibacteria bacterium//Unreviewed//Bacteria;Candidatus;Latescibacteria
+- A0A5A7RT87_UNCTM//Nucleotidyltransferase domain-containing protein//Thermoplasmata archaeon//Unreviewed//Archaea;Candidatus;Thermoplasmatota;Thermoplasmata
+- A0A926BY26_9BACT//Nucleotidyltransferase domain-containing protein//Fibrella sp//Unreviewed//Bacteria;Bacteroidota;Cytophagia;Cytophagales;Spirosomaceae;Fibrella
+- A0A350LYM3_UNCXX//Nucleotidyltransferase//bacterium//Unreviewed//Bacteria
+- A0A9D6YFG9_9BACT//Nucleotidyltransferase domain-containing protein//Candidatus Rokubacteria bacterium//Unreviewed//Bacteria;Candidatus;Rokubacteria
+- A0A957QLW1_9CHLR//Nucleotidyltransferase domain-containing protein//Anaerolineales bacterium//Unreviewed//Bacteria;Chloroflexota;Anaerolineae;Anaerolineales
+- A0A7W1CZ29_9ACTN//Uncharacterized protein//Rubrobacteraceae bacterium//Unreviewed//Bacteria;Actinomycetota;Rubrobacteria;Rubrobacterales;Rubrobacteraceae
+- A0A3B9ZRT1_9BACT//Polymerase nucleotidyl transferase domain-containing protein//Prolixibacteraceae bacterium//Unreviewed//Bacteria;Bacteroidota;Bacteroidia;Marinilabiliales;Prolixibacteraceae
+- A0A5C9EDU4_9ARCH//Putative Nucleotidyltransferase domain protein//Candidatus Lokiarchaeota archaeon//Unreviewed//Archaea;Asgard;group;Candidatus;Lokiarchaeota
+- A0A2N2JSL5_9DELT//Polymerase beta nucleotidyltransferase domain-containing protein//Deltaproteobacteria bacterium HGW-Deltaproteobacteria-11//Unreviewed//Bacteria;Deltaproteobacteria
+- A0A522UQF2_9EURY//Nucleotidyltransferase domain-containing protein//Candidatus Methanoperedens sp//Unreviewed//Archaea;Euryarchaeota;Stenosarchaea;group;Methanomicrobia;Methanosarcinales;Candidatus;Methanoperedenaceae;Candidatus;Methanoperedens
+- A0A1P9X1P8_9BACT//Polymerase nucleotidyl transferase domain-containing protein//Spirosoma montaniterrae//Unreviewed//Bacteria;Bacteroidota;Cytophagia;Cytophagales;Cytophagaceae;Spirosoma
+- A0A925R8W8_9FIRM//Nucleotidyltransferase domain-containing protein//Vallitaleaceae bacterium//Unreviewed//Bacteria;Bacillota;Clostridia;Eubacteriales;Vallitaleaceae
+- A0A537J182_9BACT//Nucleotidyltransferase domain-containing protein//Terrabacteria group bacterium ANGP1//Unreviewed//Bacteria
+- A0A959S175_9BACT//Nucleotidyltransferase domain-containing protein//Ignavibacteriota bacterium//Unreviewed//Bacteria;Ignavibacteriota
+- A0A925NW77_9BACT//Nucleotidyltransferase domain-containing protein//Prolixibacteraceae bacterium//Unreviewed//Bacteria;Bacteroidota;Bacteroidia;Marinilabiliales;Prolixibacteraceae
+- A0A923UL60_9BACT//Nucleotidyltransferase domain-containing protein//Arcicella sp//Unreviewed//Bacteria;Bacteroidota;Cytophagia;Cytophagales;Spirosomaceae;Arcicella
+- A0A202DFR6_UNCAD//Polymerase beta nucleotidyltransferase domain-containing protein//archaeon D22//Unreviewed//Archaea
+- A0A0S8GVD3_UNCZI//DNA polymerase//candidate division Zixibacteria bacterium SM23_73//Unreviewed//Bacteria
+- A0A519TH72_9BACT//Nucleotidyltransferase domain-containing protein//Hymenobacter sp//Unreviewed//Bacteria;Bacteroidota;Cytophagia;Cytophagales;Hymenobacteraceae;Hymenobacter
+- A0A7C1GPN9_9BACT//NUDIX domain-containing protein//Mesotoga infera//Unreviewed//Bacteria;Thermotogota;Thermotogae;Kosmotogales;Kosmotogaceae;Mesotoga
+- A0A357BP05_UNCDE//Nucleotidyltransferase//Deltaproteobacteria bacterium//Unreviewed//Bacteria;Deltaproteobacteria
+- A0A0W8FMW7_9ZZZZ//Putative nucleotidyltransferase//hydrocarbon metagenome//Unreviewed//unclassified;sequences;metagenomes;ecological;metagenomes
+- A0A2W2CW86_9ACTN//Polymerase nucleotidyl transferase domain-containing protein//Jiangella anatolica//Unreviewed//Bacteria;Actinomycetota;Actinomycetes;Jiangellales;Jiangellaceae;Jiangella
+- A0A1H6SQE5_9BACT//Nucleotidyltransferase domain-containing protein//Dyadobacter sp. SG02//Unreviewed//Bacteria;Bacteroidota;Cytophagia;Cytophagales;Spirosomaceae;Dyadobacter
+- A0A1G1DXP6_9BACT//Polymerase beta nucleotidyltransferase domain-containing protein//Nitrospinae bacterium RIFCSPLOWO2_12_39_16//Unreviewed//Bacteria;Nitrospinae/Tectomicrobia;group;Nitrospinota
+- A0A1I5WL75_9FIRM//Nucleotidyltransferase domain-containing protein//Caldicoprobacter faecalis//Unreviewed//Bacteria;Bacillota;Clostridia;Eubacteriales;Caldicoprobacteraceae;Caldicoprobacter
+- A0A521VJ66_9BACT//Nucleotidyltransferase domain-containing protein//Saprospiraceae bacterium//Unreviewed//Bacteria;Bacteroidota;Saprospiria;Saprospirales;Saprospiraceae
+- A0A1I2BND6_9BACT//Nucleotidyltransferase domain-containing protein//Thermoflexibacter ruber//Unreviewed//Bacteria;Bacteroidota;Cytophagia;Cytophagales;Thermoflexibacteraceae;Thermoflexibacter
+- A0A7V9VD77_9CHLR (BAD ALIGNMENT - LONG BRANCH)
+- A0A969FB27_9CHLR (BAD ALIGNMENT - LONG BRANCH)
 
-##### testing set Removed the following prior to trimming: too long or bad alignment
-- A0A0S4PZP7_9HELI//Phosphatidic acid phosphatase type 2/haloperoxidase domain-containing protein//Helicobacter typhlonius//Unreviewed//Bacteria;Pseudomonadota;
+##### testing set Removed the following prior to trimming: too long too short, or bad alignment
+- A0A971TZX4_9THEM//NUDIX domain-containing protein//Thermotogaceae bacterium//Unreviewed//Bacteria;Thermotogota;Thermotogae;Thermotogales;Thermotogaceae
+- A0A124FYT1_9BACT//LinF lincosamide nucleotidyltransferase LinF//Mesotoga prima//Unreviewed//Bacteria;Thermotogota;Thermotogae;Kosmotogales;Kosmotogace
+- A0A174JHG6_BACUN//Nucleotidyltransferase domain-containing protein//Bacteroides uniformis//Unreviewed//Bacteria;Bacteroidota;Bacteroidia;Bacteroidales;Bacteroidaceae;Bacteroides
+- A0A1J5EGN9_9BACT//Nucleotidyltransferase//Desulfobacteraceae bacterium CG2_30_51_40//Unreviewed//Bacteria;Thermodesulfobacteriota;Desulfobacteria;Desulfobacterales;Desulfobacteraceae
+- A0A957G6F0_9CHLR//Nucleotidyltransferase domain-containing protein//Anaerolineales bacterium//Unreviewed//Bacteria;Chloroflexota;Anaerolineae;Anaerolineales
+- A0A640WB02_UNCTM//Nucleotidyltransferase domain-containing protein//Thermoplasmata archaeon//Unreviewed//Archaea;Candidatus;Thermoplasmatota;Thermoplasmata
+- A0A418QE28_9DEIO//Uncharacterized protein//Deinococcus sp. RM//Unreviewed//Bacteria;Deinococcota;Deinococci;Deinococcales;Deinococcaceae;Deinococcus
+- A0A7G1GY40_9BACT//Polymerase beta nucleotidyltransferase domain-containing protein//Dissulfurispira thermophila//Unreviewed//Bacteria;Nitrospirota;Thermodesulfovibrionia;Thermodesulfovibrionales;Dissulfurispiraceae;Dissulfurispira
+- A0A0K2MI31_CLOBE//Nucleotidyltransferase domain-containing protein//Clostridium beijerinckii NRRL B-598//Unreviewed//Bacteria;Bacillota;Clostridia;Eubacteriales;Clostridiaceae;Clostridium
+
+*Removed the fasta sequences from 02c_mmseqs_reps_90.fasta (training set) and 02f_mmseq90_secReps.fa (testing set) and reran the alignment in step A after removing the above sequences from the fasta files and then trimmed after realignment.*
 
 ```bash
 # training set
@@ -286,8 +367,8 @@ grep -c '>' 03_ROCkIn_Results/03b_mmseq90_secReps.trimmed.aln
 
 **Results:**
 
-- Training set sequences after trimming: 1471
-- Testing set sequences after trimming: 480
+- Training set sequences after trimming: 182
+- Testing set sequences after trimming: 50
 
 ### c. clean up seq names for clean tree leaves
 
@@ -358,34 +439,40 @@ python ../ROCkIn/02_Python/03c_Plot_Annotated_Tree_v2.py -a 03_ROCkIn_Results/03
 ```
 
 #### Training set - clade/cluster labeled tree
-![Training set tree](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/04_lnu/00_figures/03a_training_set_tree.png)
+
+The below image is the default IQTree and clade/cluster labeling from the 03c_Plot_Annotated_Tree_v2.py script. This script uses the HDBSCAN algorithm to guess at gene clades/clusters. An all vs all distance matrix of tree branch lengths is computed and used as input to HDBSCAN. This labeling is intended as a predicted starting point and is used to label and order the genes in the corresponding output 03h_Gene_Data_90_annotated.tsv data file. The researcher can change the labels in the data file and rerun the 03c plotting script as needed.
+
+![Training set tree](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/04_lnu/00_figures/03a_lnu_training_set_tree.png)
 
 #### Testing set - clade/cluster labeled tree
-![Testing set tree](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/04_lnu/00_figures/03b_training_set_tree.png)
+
+The below image is the default IQTree and clade/cluster labeling from the 03c_Plot_Annotated_Tree_v2.py script. This script uses the HDBSCAN algorithm to guess at gene clades/clusters. An all vs all distance matrix of tree branch lengths is computed and used as input to HDBSCAN. This labeling is intended as a predicted starting point and is used to label and order the genes in the corresponding output 03h_Gene_Data_90_annotated.tsv data file. The researcher can change the labels in the data file and rerun the 03c plotting script as needed.
+
+![Testing set tree](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/04_lnu/00_figures/03b_lnu_testing_set_tree.png)
 
 Review the Data Table and the Phylogenetic tree to make positive and negative UniProt ID selections to give to ROCkOut. Clade/Cluster labels can be changed in the tsv file and the tree can be replotted.
 
 - for the test set be sure to remove all the RepSeqs from the UniProt ID list.
 - for the training set remove any Gene Names that aren't a UniProt ID.
-- for the training set, look at 02b_filter/02b_mcr_matches_pID100.fa and include some sequences that 100% similar to any RepSeqs without a UniProt ID. You only need 1 per RepSeq. This will include some different genomes in the training set that have the identical copies.
+- for the training set, look at 02b_filter/02b_lnu_matches_pID100.fa and include some sequences that 100% similar to any RepSeqs without a UniProt ID. You only need 1 per RepSeq. This will include some different genomes in the training set that have the identical copies.
 
 **Results**
 
 We decided to build two models:
 
-1. A model using all the genes in the *Training set* tree as positive references to make a model that captures all mcr genes and includes the epta genes because they share the same function. This model is useful for broad surveillance of eptA and mcr gene functions in microbial communities. We refer to this model as lnuAll.
-1. A model focusing specifically on the MCR-1.1, MCR-2.1, MCR-6.1 gene clade of the *Training set* using only the sequences from this clade as positive references and using all other sequences as negative references. We refer to this model as lnuF.
+1. A model capturing all lnu genes (F, B, G, H) used in the *Training set* tree as positive references to make a model that captures all of these lnu genes. This model also uses a negative references from the polymerase clades x-x in the default chart. This model is useful for broad surveillance of lnu F, B, G, H gene functions in microbial communities. We refer to this model as lnuAll.
+1. A model focusing specifically on the lnuF gene clade of the *Training set* using only the sequences from this clade as positive references and using all other sequences as negative references. We refer to this model as lnuF.
 
 We make two similar similar selections for the *Testing set*:
 
-1. We select all genes in the *Testing set* to use as positive references. The genomes containing these genes will be used to create a mock metagenome to challenge the lnuAll ROCker model.
-1. We select genes in the *Testing set* specifically from the MCR-1.1, MCR-2.1, MCR-6.1 gene clade. The genomes containing these genes will be used to create a mock metagenome to challenge the lnuF ROCker model.
+1. We mirrored the gene selections from the lnuAll model with the *Testing set* to use as positive and negative references. The genomes containing these genes will be used to create a mock metagenome to challenge the lnuAll ROCker model.
+1. We select genes in the *Testing set* specifically from the lnuF gene clade. The genomes containing these genes will be used to create a mock metagenome to challenge the lnuF ROCker model.
 
 # Step 04: Build ROCker models
 
 *I don't have the final figures yet. Waiting on Kenji to finalize the ROCkOut code.*
 
-Several genomes in this model have more than one mcr/epta/sulfatase gene in the genome that share considerable sequence similarity and conserved sites in the multiple sequence alignment. These additional gene copies were found by the ROCkIn workflow, but they were discluded during the dereplication step. They show up in the model labeled as orange non_target genes but they fall at or above the blue ROCker filter threshold. ROCkOut provides the genome, genomic position each simulated read came from, and the target gene's UniProt ID associated with the genome the read came from. We used this information to look up the genome on NCBI, track down the coordinates to retrieve the gene (amino acid) fasta sequence, and used UniProt BLAST+ search to find the associated UniProt ID. We check the multiple sequence alignments and annotation information before adding the UniProt ID of the additional gene copy to the positive target input list. We did this iterative process of tracking down genes for both training and testing sets.
+This is a paragraph about any modification to the input UniProt ID lists when building the ROCker model
 
 This is an iterative process of building a model, investigating the results, and tracking down all the peculiarities to arrive at a final postive and/or negative UniProt ID set.
 
@@ -587,7 +674,7 @@ two files 1) mock metagenome 2) hmmsearch result
 
 rocker results same thing but blastx results are split into passing and failing files.
 three files 1) mock metagenome 2) passing 3) failing
-from: /storage/home/hcoda1/9/rconrad6/scratch/ROCkOut/02_mcr/02a_lnuF_train
+from: /storage/home/hcoda1/9/rconrad6/scratch/ROCkOut/02_lnu/02a_lnuF_train
 
 ```bash
 # lnuAll model
@@ -839,9 +926,9 @@ cp model/shared_files/combined_genomes/combined_proteins_aa.fasta final_tree/
 # Clean seq names
 python 00_scripts/clean_seq_names.py -i final_tree/combined_proteins_aa.fasta
 
-# Create multiple alignment by first aligning the mcr SeedSeqs and then adding the combined proteins to the SeedSeq alignment.
+# Create multiple alignment by first aligning the lnu SeedSeqs and then adding the combined proteins to the SeedSeq alignment.
 # using clustal omega version 1.2.4
-sbatch --export verified=mcr_SeedSeqs.faa,newseqs=combined_proteins_aa.fasta,output=final_tree_seqs.aln 00_scripts/seq_alignment.sbatch 
+sbatch --export verified=lnu_SeedSeqs.faa,newseqs=combined_proteins_aa.fasta,output=final_tree_seqs.aln 00_scripts/seq_alignment.sbatch 
 
 # use Aliview to view and edit the multiple alignment.
 # Use Trimal to trim up the alignment.

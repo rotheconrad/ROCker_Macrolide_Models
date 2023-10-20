@@ -171,7 +171,7 @@ cat 00a_log/02b_BlastP.out
 - Number of duplicate blast matches passing filter to remove: 43451
 - Number of best hit entries written to new file: 5427 
 
-![Diagnostic histograms of sequence search results](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/01_mcr/00_figures/02a_diagnostic_histograms.png)
+![Diagnostic histograms of sequence search results](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/01_mcr/00_figures/02a_mcr_diagnostic_histograms.png)
 
 ### c. Dereplicate - similar sequence clustering with MMSeqs2
 
@@ -244,8 +244,8 @@ grep -c '>' 03_ROCkIn_Results/03a_mmseq90_secReps.fa.aln
 
 **Results:**
 
-- Sequences before trimming: 1473 (1458 searched + 15 SeedSeqs)
-- Sequences before trimming: 488 (473 searched + 15 SeedSeqs)
+- Traing set sequences before trimming: 1473 (1458 searched + 15 SeedSeqs)
+- Testing set sequences before trimming: 488 (473 searched + 15 SeedSeqs)
 
 ### b. trim
 
@@ -358,10 +358,16 @@ python ../ROCkIn/02_Python/03c_Plot_Annotated_Tree_v2.py -a 03_ROCkIn_Results/03
 ```
 
 #### Training set - clade/cluster labeled tree
-![Training set tree](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/01_mcr/00_figures/03a_training_set_tree.png)
+
+The below image is the default IQTree and clade/cluster labeling from the 03c_Plot_Annotated_Tree_v2.py script. This script uses the HDBSCAN algorithm to guess at gene clades/clusters. An all vs all distance matrix of tree branch lengths is computed and used as input to HDBSCAN. This labeling is intended as a predicted starting point and is used to label and order the genes in the corresponding output 03h_Gene_Data_90_annotated.tsv data file. The researcher can change the labels in the data file and rerun the 03c plotting script as needed.
+
+![Training set tree](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/01_mcr/00_figures/03a_mcr_training_set_tree.png)
 
 #### Testing set - clade/cluster labeled tree
-![Testing set tree](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/01_mcr/00_figures/03b_training_set_tree.png)
+
+The below image is the default IQTree and clade/cluster labeling from the 03c_Plot_Annotated_Tree_v2.py script. This script uses the HDBSCAN algorithm to guess at gene clades/clusters. An all vs all distance matrix of tree branch lengths is computed and used as input to HDBSCAN. This labeling is intended as a predicted starting point and is used to label and order the genes in the corresponding output 03i_Gene_Data_90_annotated.tsv data file. The researcher can change the labels in the data file and rerun the 03c plotting script as needed.
+
+![Testing set tree](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/01_mcr/00_figures/03b_mcr_testing_set_tree.png)
 
 Review the Data Table and the Phylogenetic tree to make positive and negative UniProt ID selections to give to ROCkOut. Clade/Cluster labels can be changed in the tsv file and the tree can be replotted.
 

@@ -1,12 +1,12 @@
 # Working notes for development of ROCker models for mph genes
 
-These notes contain the step-by-step details using ROCkIn and ROCkOut to curate training and testing sequence, to build the models, and to test the models for mobile colistin resistance genes. ROCkIn and ROCkOut and all their dependencies are required to reproduce the commands.
+These notes contain the step-by-step details using ROCkIn and ROCkOut to curate training and testing sequence, to build the models, and to test the models for macrolide phosphotransferase genes. ROCkIn and ROCkOut and all their dependencies are required to reproduce the commands.
 
-mcr = mobile colistin resistance genes
+mph = macrolide phosphotransferase genes
 
-colistin (aka polymixin) resistance involves an L-Ara4N, 2-aminoethanol, or PEtN modification of lipid A. Several bacterial species have this ability as a response to certain external stimuli such as the eptA gene which shares sequence similarity with the mcr genes. Several spontaneous mutations have been documented that result in the same lipid A modification.
+Macrolide phosphotransferases (MPH) are enzymes encoded by macrolide phosphotransferase genes (mph genes). These enzymes phosphorylate macrolides in GTP dependent manner at 2'-OH of desosamine sugar thereby inactivating them. Characterized MPH's are differentiated based on their substrate specificity.
 
-mcr genes enocde an LPS-modifying enzyme and are mobilized on a variety of plasmids. mcr-1 is primarily mobilized by an ISApl1 composite (IS30 family) transposon. The mcr-1 gene confers colistin resistance by encoding a phosphoethanolamine transferase that catalyzes the addition of a phosphoethanolamine moiety to lipid A in the bacterial outer membrane. MCR-1 confers resistance by modifying the colistin target, catalyzing transfer of phosphoethanolamine (PEA) onto the glucosamine saccharide of lipid A in the bacterial outer membrane. This reduces the net negative charge of the lipid A head group and, consequently, colistin binding.
+Macrolides are a group of drugs (typically antibiotics) that have a large macrocyclic lactone ring of 12-16 carbons to which one or more deoxy sugars, usually cladinose and desosamine, may be attached. Macrolides bind to the 50S-subunit of bacterial ribosomes, inhibiting the synthesis of vital proteins.
 
 # Table of Contents
 
@@ -21,22 +21,40 @@ mcr genes enocde an LPS-modifying enzyme and are mobilized on a variety of plasm
 
 Curate starting sequences. Source from NCBI's refgene database.
 
-### a. Find and retrieve sequences (May 24th, 2023)
+### a. Find and retrieve sequences (Oct 5th, 2023)
 
-There are 10 classes of mcr genes (mcr-1 thru mcr-10) with multiple squence variants (alleles) per class. They are designated as mcr 1.1, mcr 1.2, mcr 2.1, mcr 2.2, and etc.
+I find there are 6 classes of mph gene. A, B, C, E, F, and G.
 
-*note 3.30 allele missing from the consecutive order.*
-
-Search for mcr genes at ncbi refgene database returned 108 results
-https://www.ncbi.nlm.nih.gov/pathogens/refgene/#mcr
+Search for mph genes at ncbi refgene database returned 14 results
+https://www.ncbi.nlm.nih.gov/pathogens/refgene/#mph
 
 Use the Download button, select "Dataset (.zip)" from the drop down menu, and check the "Reference protein" box to download (reference_protein.faa)
 
-We also know that the eptA gene is a phosphoethanolamine transferase related to the mcr genes.
+mph(A) - 3 sequences
+mph(B) - 1 sequence
+mph(C) - 6 sequences
+mph(E) - 2 sequences
+mph(F) - 1 sequence
+mph(G) - 1 sequence
 
-I retrieved the uniprot amino acid sequence for eptA from Ecoli (P30845|EPTA_ECOLI, A0A0H3JML2|EPTA_ECO57), Helicobacter pylori (O24867|EPTA_HELPY) and Salmonella typhimurium (P36555|EPTA_SALTY) as well since the mcr's appear to come from eptA. based on literature and based on a first round of uniprot blast searches with the ncbi mcr refgenes.
+Rename fasta sequences with underscores and shorten names:
 
-Download fasta sequences and rename files. Collect the set of renamed fasta formatted sequences into a single file for amino acid sequence. These are referred to as the curated or reference sequences (mcr_SeedSeqs.faa)
+>WP_000219391.1_MphA_Bacteria
+>WP_063853854.1_MphA_Escherichia_coli
+>WP_063853866.1_MphA_Shigella_flexneri
+>WP_000031017.1_MphB_Bacteria
+>WP_063853881.1_MphC_Staphylococcaceae
+>WP_063853892.1_MphC_Stenotrophomonas_maltophilia
+>WP_000196697.1_MphC_Bacillales
+>WP_063854131.1_MphC_Staphylococcus_equorum
+>WP_063854137.1_MphC_Staphylococcus_xylosus
+>WP_063854150.1_MphC_Staphylococcus_equorum
+>WP_014325835.1_MphE_Pasteurellaceae
+>WP_021263608.1_MphF_Pseudomonadota
+>WP_014386803.1_MphG_Pseudomonadota
+>WP_000155092.1_MphE_Bacteria
+
+Download fasta sequences and rename files. Collect the set of renamed fasta formatted sequences into a single file for amino acid sequence. These are referred to as the curated or reference sequences (mph_SeedSeqs.faa)
 
 ### b. Explore sequence diversity
 
@@ -51,25 +69,25 @@ Use EBI Clustalo https://www.ebi.ac.uk/Tools/msa/clustalo/
 1. Select result summary tab.
 1. Download the pim file (PIM) for the percent identity matrix.
 
-#### Multiple sequence alignment of mcr seed sequences.
+#### Multiple sequence alignment of mph seed sequences.
 
-![Multiple sequence alignment of mcr seed sequences.](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/02_mph/00_figures/00a_mcr_SeedSeqs_msa.png)
+![Multiple sequence alignment of mph seed sequences.](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/02_mph/00_figures/00a_mph_SeedSeqs_msa.png)
 
 Multiple sequence alignment image produced with AliView highlighting majority rule concensus characters.
 
-#### Neighbor joining phylogenetic tree of mcr seed sequences.
+#### Neighbor joining phylogenetic tree of mph seed sequences.
 
-![Neighbor joining phylogenetic tree of mcr seed sequences.](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/02_mph/00_figures/00b_mcr_SeedSeqs_tree.png)
+![Neighbor joining phylogenetic tree of mph seed sequences.](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/02_mph/00_figures/00b_mph_SeedSeqs_tree.png)
 
 Neighbor joining phylogenetic tree image produced with FigTree default settings.
 
-#### Percent sequence identity matrix hierarchical clustered heatmap of mcr seed sequences.
+#### Percent sequence identity matrix hierarchical clustered heatmap of mph seed sequences.
 
 ```bash
-python /ROCkIn/02_Python/00a_PIM_clustered_heatmap.py -i mcr_SeedSeqs.faa.aln.pim -o mcr_SeedSeqs.faa.aln.pim.pdf
+python /ROCkIn/02_Python/00a_PIM_clustered_heatmap.py -i mph_SeedSeqs.faa.aln.pim -o mph_SeedSeqs.faa.aln.pim.pdf
 ```
 
-![Multiple sequence alignment of mcr seed sequences.](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/02_mph/00_figures/00c_mcr_SeedSeqs_pim.png)
+![Multiple sequence alignment of mph seed sequences.](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/02_mph/00_figures/00c_mph_SeedSeqs_pim.png)
 
 Neighbor joining phylogenetic tree image produced with FigTree default settings.
 
@@ -77,11 +95,11 @@ Neighbor joining phylogenetic tree image produced with FigTree default settings.
 
 Review the multiple alignment and/or phylogenetic tree and/or heatmap and select representative sequences (i.e., remove highly similar sequences). We will use these curated sequences for a sequence search in uniprot and will not gain anything from sequences that are too similar (i.e. ≥ 90% sequence identity or one sequence from each strongly formed clade).
 
-Create a new fasta file with selected representative sequences (mcr_SeedSeqs.faa). In this case I've selected the first allele for mcr-1 thru mcr-10 (mcr-1.1, etc.) as well as mcr-3.8, 3.17, EPTA_HELPY, EPTA_SALTY, and EPTA_ECOLI.
+Create a new fasta file with selected representative sequences (NCBI_mph_reps.faa). In this case I chose 1 (A), 2 (C), and 1 (E) with the single B, F, and G.
 
 # Step 01: UniProt sequence search
 
-Run a search of the curated mcr sequences (RefSeqs) against the UniProt database.
+Run a search of the curated mph sequences (RefSeqs) against the UniProt database.
 This is to look for extended sequence diversity.
 
 ```bash
@@ -94,7 +112,7 @@ mkdir 00a_log 01a_ebi_blast 01b_ebi_dat 01c_ebi_fasta
 This step returns UniProt IDs for blast sequence matches.
 
 ```bash
-sbatch --export fasta=mcr_SeedSeqs.faa /ROCkIn/01b_Sbatch/01a_ebi_blast.sbatch
+sbatch --export fasta=mph_SeedSeqs.faa /ROCkIn/01b_Sbatch/01a_ebi_blast.sbatch
 
 # move files into folder to keep clean organization
 mv *.txt 01a_ebi_blast/
@@ -113,15 +131,15 @@ for f in 01a_ebi_blast/*; do odir='01b_ebi_dat'; gene=`basename $f | cut -d. -f1
 for d in 01b_ebi_dat/*; do n=`basename $d`; echo $n; python ../ROCkIn/02_Python/01d_parse_dat_file.py -i $d -o 01c_ebi_fasta/${n}.fasta; done
 
 # concatenate gene fastas into single fasta file
-cat 01c_ebi_fasta/*.fasta >> 01d_mcr_all_ebi_matches.fa
+cat 01c_ebi_fasta/*.fasta >> 01d_mph_all_ebi_matches.fa
 
 # count 'em
-grep -c '>' 01d_mcr_all_ebi_matches.fa
+grep -c '>' 01d_mph_all_ebi_matches.fa
 ```
 
 **Results:**
 
-- 13,067 fasta sequences returned from blast search
+- 7,000 fasta sequences returned from blast search
 
 # Step 02: Deduplicate, filter, dereplicate
 
@@ -130,14 +148,14 @@ grep -c '>' 01d_mcr_all_ebi_matches.fa
 Since we have multiple verified sequences that we searched to UniProt, we likely have found overlapping search results. Concatenate fasta files of all search result sequences and deduplicate by UniProt ID. I wrote a Python script to deduplicate the concatenated fasta
 
 ```bash
-python /ROCkIn/02_Python/02a_Remove_Duplicate_Fasta_Entries.py -f 01d_mcr_all_ebi_matches.fa -o 02a_mcr_matches_dedup.fa
+python /ROCkIn/02_Python/02a_Remove_Duplicate_Fasta_Entries.py -f 01d_mph_all_ebi_matches.fa -o 02a_mph_matches_dedup.fa
 ```
 
 **Results:**
 
-- Total sequences in file: 13067
-- Duplicates Removed: 7640
-- Unique sequences retained: 5427
+- Total sequences in file: 7000
+- Duplicates Removed: 5889
+- Unique sequences retained: 1111
 
 ### b. Filter
 
@@ -153,41 +171,41 @@ This script outputs 100% sequence matches separately as well in tabular blast, f
 
 The script also plots histograms of each parameter post filtering and can be rerun with different filtering options if neccessary.
 
-I wrapped it into an sbatch script. This step produces the 02b_filter output directory containing the filtered tabular BLAST output file 02b_mcr_matches_fltrdBstHts.fa which is used downstream. It also contains several diagnostic histograms which provide a visual representation of the sequence search results and can be used to modify the filtering settings if necessary.
+I wrapped it into an sbatch script. This step produces the 02b_filter output directory containing the filtered tabular BLAST output file 02b_mph_matches_fltrdBstHts.fa which is used downstream. It also contains several diagnostic histograms which provide a visual representation of the sequence search results and can be used to modify the filtering settings if necessary.
 
 The 02b_filter output directory also contains the file 02b_mph_matches_pID100_list.txt. This file is used to identify UniProt IDs that have 100% Sequence Similarity with the SeedSeqs. The input to ROCkOut is UniProt IDs but we retrieved our SeedSeqs from NCBI. We use this file to select 1 UniProt ID for each SeedSeq to include in the *Training set* set list.
 
 ```bash
-sbatch --export ref=mcr_SeedSeqs.faa,qry=02a_mcr_matches_dedup.fa,out=02b_mcr_matches /ROCkIn/01b_Sbatch/02b_Blastp.sbatch
+sbatch --export ref=mph_SeedSeqs.faa,qry=02a_mph_matches_dedup.fa,out=02b_mph_matches /ROCkIn/01b_Sbatch/02b_Blastp.sbatch
 
 cat 00a_log/02b_BlastP.out
 ```
 
 **Results:**
 
-- Total number of entries in blast file: 55073
-- Number of entries failing the filters: 6195
-- Number of entries passing the filters: 48878
-- Number of duplicate blast matches passing filter to remove: 43451
-- Number of best hit entries written to new file: 5427 
+- Total number of entries in blast file: 7939
+- Number of entries failing the filters: 304
+- Number of entries passing the filters: 7635
+- Number of duplicate blast matches passing filter to remove: 6531
+- Number of best hit entries written to new file: 1104
 
-![Diagnostic histograms of sequence search results](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/02_mph/00_figures/02a_diagnostic_histograms.png)
+![Diagnostic histograms of sequence search results](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/02_mph/00_figures/02a_mph_diagnostic_histograms.png)
 
 ### c. Dereplicate - similar sequence clustering with MMSeqs2
 
-5427 sequences is way more than we need. Let's dereplicate the set some.
+1104 sequences is way more than we need. Let's dereplicate the set some.
 
 Use mmseqs to generate sequence clusters of 90% amino acid sequence similarity and select cluster representatives. These representative sequences are used for the *Training set* set sequences to build the ROCker models with ROCkOut.
 
 ```bash
-sbatch --export infile=02b_mcr_matches_fltrdBstHts.fa,oDir=02c_dereplicate_90,ss=90 ../ROCkIn/01b_Sbatch/02c_mmseqs.sbatch
+sbatch --export infile=02b_mph_matches_fltrdBstHts.fa,oDir=02c_dereplicate_90,ss=90 ../ROCkIn/01b_Sbatch/02c_mmseqs.sbatch
 
 grep -c '>' 02c_dereplicate_90/02_mmseqs_reps.fasta
 ```
 
 **Results:**
 
-- Representative sequences retained: 1458
+- Representative sequences retained: 400
 
 ### d. Select secondary cluster representatives to create a *Testing set*
 
@@ -196,7 +214,7 @@ mmseqs outputs a fasta file of cluster representatives which we will make our se
 By default a random seed is not set for this script so the secondary representative selection is chosen randomly from each cluster each time the script is rerun (excluding the primary cluster representative selected by mmseqs2). use the optional -s parameter to set a fixed seed for reproducible "random" selections.
 
 ```bash
-python ../ROCkIn/02_Python/02d_Get_Test_secReps.py -f 02b_mcr_matches_fltrdBstHts.fa -c 02c_dereplicate_90/02c_mmseqs_results_90.tsv -o 02f_mmseq90
+python ../ROCkIn/02_Python/02d_Get_Test_secReps.py -f 02b_mph_matches_fltrdBstHts.fa -c 02c_dereplicate_90/02c_mmseqs_results_90.tsv -o 02f_mmseq90
 
 mkdir 02d_secReps_testSets
 
@@ -207,7 +225,7 @@ grep -c '>' 02d_secReps_testSets/02f_mmseq90_secReps.fa
 
 **Results:**
 
-- Secondary representative sequences retained: 473
+- Secondary representative sequences retained: 112
 
 #### We now have fasta files for two sets of sequences:
 
@@ -229,14 +247,14 @@ I put the commands into an sbatch script
 ```bash
 # training set
 
-sbatch --export verified=mcr_SeedSeqs.faa,newseqs=02c_dereplicate_90/02c_mmseqs_reps_90.fasta /ROCkIn/01b_Sbatch/03a_seq_alignment.sbatch
+sbatch --export verified=mph_SeedSeqs.faa,newseqs=02c_dereplicate_90/02c_mmseqs_reps_90.fasta /ROCkIn/01b_Sbatch/03a_seq_alignment.sbatch
 
 # sequences before trimming
 grep -c '>' 03_ROCkIn_Results/03a_mmseqs_reps_90.fasta.aln
 
 # testing set
 
-sbatch --export verified=mcr_SeedSeqs.faa,newseqs=02d_secReps_testSets/02f_mmseq90_secReps.fa /ROCkIn/01b_Sbatch/03a_seq_alignment.sbatch
+sbatch --export verified=mph_SeedSeqs.faa,newseqs=02d_secReps_testSets/02f_mmseq90_secReps.fa /ROCkIn/01b_Sbatch/03a_seq_alignment.sbatch
 
 # sequences before trimming
 grep -c '>' 03_ROCkIn_Results/03a_mmseq90_secReps.fa.aln
@@ -244,8 +262,8 @@ grep -c '>' 03_ROCkIn_Results/03a_mmseq90_secReps.fa.aln
 
 **Results:**
 
-- Sequences before trimming: 1473 (1458 searched + 15 SeedSeqs)
-- Sequences before trimming: 488 (473 searched + 15 SeedSeqs)
+- Training set sequences before trimming: 407 (400 searched + 7 curated)
+- Testing set sequences before trimming: 119 (112 searched + 7 curated)
 
 ### b. trim
 
@@ -261,14 +279,10 @@ Before using trimmal, it is good to review the MSA and remove (or at least flag)
 - check large gaps in the alignment to see if only 1 or a few sequences are responsible for creating the gap and consider removing them.
 
 ##### training set Removed the following prior to trimming: too long or bad alignment
-- A0A077Z953_TRITR//Probable transcriptional regulator ycf27//Trichuris trichiura (Whipworm) (Trichocephalus trichiurus)//Unreviewed//Eukaryota;Metazoa;Ecdy
-- Q7VH02_HELHP//Phosphatidic acid phosphatase type 2/haloperoxidase domain-containing protein//Helicobacter hepaticus (strain ATCC 51449 / 3B1)//Unreviewed/
-- A0A7Z7MUD9_9PROT//Membrane-associated, metal-dependent hydrolase (Modular protein)//Sterolibacterium denitrificans//Unreviewed//Bacteria;Pseudomonadota;Betaproteobact
-A0A4Q3HK81_9HYPH//Phosphoethanolamine transferase//Hyphomicrobiales bacterium//Unreviewed//Bacteria;Pseudomonadota;Alphaproteobacteria;Hyphomicrobiales
-- A0A1H9NI52_9PSED//Lipid A ethanolaminephosphotransferase//Pseudomonas sp. NFACC02//Unreviewed//Bacteria;Pseudomonadota;Gammaproteobacteria;Pseudomonada
+- A0A2H1JR23_9MICO//Predicted kinase, aminoglycoside phosphotransferase (APT) family//Brevibacterium antiquum CNRZ 918//Unreviewed//Bacteria;Actinomycetota;A
 
 ##### testing set Removed the following prior to trimming: too long or bad alignment
-- A0A0S4PZP7_9HELI//Phosphatidic acid phosphatase type 2/haloperoxidase domain-containing protein//Helicobacter typhlonius//Unreviewed//Bacteria;Pseudomonadota;
+- A0A5B8BZN5_9MICO//Aminoglycoside phosphotransferase//Georgenia yuyongxinii//Unreviewed//Bacteria;Actinomycetota;Actinomycetes;Micrococcales;Bogoriellaceae;Georg
 
 ```bash
 # training set
@@ -286,8 +300,8 @@ grep -c '>' 03_ROCkIn_Results/03b_mmseq90_secReps.trimmed.aln
 
 **Results:**
 
-- Training set sequences after trimming: 1471
-- Testing set sequences after trimming: 480
+- Training set sequences after trimming: 404
+- Testing set sequences after trimming: 118
 
 ### c. clean up seq names for clean tree leaves
 
@@ -358,34 +372,45 @@ python ../ROCkIn/02_Python/03c_Plot_Annotated_Tree_v2.py -a 03_ROCkIn_Results/03
 ```
 
 #### Training set - clade/cluster labeled tree
-![Training set tree](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/02_mph/00_figures/03a_training_set_tree.png)
+
+The below image is the default IQTree and clade/cluster labeling from the 03c_Plot_Annotated_Tree_v2.py script. This script uses the HDBSCAN algorithm to guess at gene clades/clusters. An all vs all distance matrix of tree branch lengths is computed and used as input to HDBSCAN. This labeling is intended as a predicted starting point and is used to label and order the genes in the corresponding output 03h_Gene_Data_90_annotated.tsv data file. The researcher can change the labels in the data file and rerun the 03c plotting script as needed.
+
+![Training set tree](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/02_mph/00_figures/03a_mph_training_set_tree.png)
 
 #### Testing set - clade/cluster labeled tree
-![Testing set tree](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/02_mph/00_figures/03b_training_set_tree.png)
+
+The below image is the default IQTree and clade/cluster labeling from the 03c_Plot_Annotated_Tree_v2.py script. This script uses the HDBSCAN algorithm to guess at gene clades/clusters. An all vs all distance matrix of tree branch lengths is computed and used as input to HDBSCAN. This labeling is intended as a predicted starting point and is used to label and order the genes in the corresponding output 03h_Gene_Data_90_annotated.tsv data file. The researcher can change the labels in the data file and rerun the 03c plotting script as needed.
+
+![Testing set tree](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/02_mph/00_figures/03b_mph_testing_set_tree.png)
 
 Review the Data Table and the Phylogenetic tree to make positive and negative UniProt ID selections to give to ROCkOut. Clade/Cluster labels can be changed in the tsv file and the tree can be replotted.
 
 - for the test set be sure to remove all the RepSeqs from the UniProt ID list.
 - for the training set remove any Gene Names that aren't a UniProt ID.
-- for the training set, look at 02b_filter/02b_mcr_matches_pID100.fa and include some sequences that 100% similar to any RepSeqs without a UniProt ID. You only need 1 per RepSeq. This will include some different genomes in the training set that have the identical copies.
-
-**Results**
+- for the training set, look at 02b_filter/02b_mph_matches_pID100.fa and include some sequences that 100% similar to any RepSeqs without a UniProt ID. You only need 1 per RepSeq. This will include some different genomes in the training set that have the identical copies.
 
 We decided to build two models:
 
-1. A model using all the genes in the *Training set* tree as positive references to make a model that captures all mcr genes and includes the epta genes because they share the same function. This model is useful for broad surveillance of eptA and mcr gene functions in microbial communities. We refer to this model as mphAll.
-1. A model focusing specifically on the MCR-1.1, MCR-2.1, MCR-6.1 gene clade of the *Training set* using only the sequences from this clade as positive references and using all other sequences as negative references. We refer to this model as mphA.
+1. A model using all the genes in the *Training set* tree as positive references to make a model that captures all mph genes. This model is useful for broad surveillance mph gene functions in microbial communities. We refer to this model as mphAll. Looking at the multiple sequence alignment, phylogenetic tree, gene annotations and taxonomic classifications we did not see any cleary distinguished outgroup form in our results. The mphB reference sequence falls close to one end of our tree and the mphG and mphE reference sequences fall at the other end. To the best of our knowledge, all genes retrieved are bioinformatically likely to perform the mph gene function, and no clear closely related sequences of diverging function were identified in the similar sequence space.
+1. A model focusing specifically on the mphA gene clade of the *Training set* using only the sequences from this clade as positive references and using all other sequences as negative references. We refer to this model as mphA. The mphA clade may be of particlar intrest to some ARG researchers and formed a clearly distinguished clade in sequence space from the other mph gene clades.
 
-We make two similar similar selections for the *Testing set*:
+We make two similar selections for the *Testing set*:
 
 1. We select all genes in the *Testing set* to use as positive references. The genomes containing these genes will be used to create a mock metagenome to challenge the mphAll ROCker model.
-1. We select genes in the *Testing set* specifically from the MCR-1.1, MCR-2.1, MCR-6.1 gene clade. The genomes containing these genes will be used to create a mock metagenome to challenge the mphA ROCker model.
+1. We select genes in the *Testing set* specifically from the mphA gene clade. The genomes containing these genes will be used to create a mock metagenome to challenge the mphA ROCker model.
+
+**Results**
+
+- mphAll_train_positive.txt
+- mphAll_test_positive.txt
+- mphA_train_pos.txt, mphA_train_neg.txt
+- mphA_test_pos.txt, mphA_test_neg.txt
 
 # Step 04: Build ROCker models
 
 *I don't have the final figures yet. Waiting on Kenji to finalize the ROCkOut code.*
 
-Several genomes in this model have more than one mcr/epta/sulfatase gene in the genome that share considerable sequence similarity and conserved sites in the multiple sequence alignment. These additional gene copies were found by the ROCkIn workflow, but they were discluded during the dereplication step. They show up in the model labeled as orange non_target genes but they fall at or above the blue ROCker filter threshold. ROCkOut provides the genome, genomic position each simulated read came from, and the target gene's UniProt ID associated with the genome the read came from. We used this information to look up the genome on NCBI, track down the coordinates to retrieve the gene (amino acid) fasta sequence, and used UniProt BLAST+ search to find the associated UniProt ID. We check the multiple sequence alignments and annotation information before adding the UniProt ID of the additional gene copy to the positive target input list. We did this iterative process of tracking down genes for both training and testing sets.
+This is a paragraph about any modification to the input UniProt ID lists when building the ROCker model
 
 This is an iterative process of building a model, investigating the results, and tracking down all the peculiarities to arrive at a final postive and/or negative UniProt ID set.
 
@@ -587,7 +612,7 @@ two files 1) mock metagenome 2) hmmsearch result
 
 rocker results same thing but blastx results are split into passing and failing files.
 three files 1) mock metagenome 2) passing 3) failing
-from: /storage/home/hcoda1/9/rconrad6/scratch/ROCkOut/02_mcr/02a_mphA_train
+from: /storage/home/hcoda1/9/rconrad6/scratch/ROCkOut/02_mph/02a_mphA_train
 
 ```bash
 # mphAll model
@@ -839,9 +864,9 @@ cp model/shared_files/combined_genomes/combined_proteins_aa.fasta final_tree/
 # Clean seq names
 python 00_scripts/clean_seq_names.py -i final_tree/combined_proteins_aa.fasta
 
-# Create multiple alignment by first aligning the mcr SeedSeqs and then adding the combined proteins to the SeedSeq alignment.
+# Create multiple alignment by first aligning the mph SeedSeqs and then adding the combined proteins to the SeedSeq alignment.
 # using clustal omega version 1.2.4
-sbatch --export verified=mcr_SeedSeqs.faa,newseqs=combined_proteins_aa.fasta,output=final_tree_seqs.aln 00_scripts/seq_alignment.sbatch 
+sbatch --export verified=mph_SeedSeqs.faa,newseqs=combined_proteins_aa.fasta,output=final_tree_seqs.aln 00_scripts/seq_alignment.sbatch 
 
 # use Aliview to view and edit the multiple alignment.
 # Use Trimal to trim up the alignment.

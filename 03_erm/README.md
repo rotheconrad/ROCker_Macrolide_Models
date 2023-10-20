@@ -1,12 +1,25 @@
-# Working notes for development of ROCker models for mcr genes
+# Working notes for development of ROCker models for erm genes
 
-These notes contain the step-by-step details using ROCkIn and ROCkOut to curate training and testing sequence, to build the models, and to test the models for mobile colistin resistance genes. ROCkIn and ROCkOut and all their dependencies are required to reproduce the commands.
+These notes contain the step-by-step details using ROCkIn and ROCkOut to curate training and testing sequence, to build the models, and to test the models for erythromycin resistance macrolide genes. ROCkIn and ROCkOut and all their dependencies are required to reproduce the commands.
 
-mcr = mobile colistin resistance genes
+erm genes are in the macrolide family annotated as
+23S rRNA (adenine(2058)-N(6))-methyltransferase
 
-colistin (aka polymixin) resistance involves an L-Ara4N, 2-aminoethanol, or PEtN modification of lipid A. Several bacterial species have this ability as a response to certain external stimuli such as the eptA gene which shares sequence similarity with the mcr genes. Several spontaneous mutations have been documented that result in the same lipid A modification.
+erm - erythromycin resistance macrolide
 
-mcr genes enocde an LPS-modifying enzyme and are mobilized on a variety of plasmids. mcr-1 is primarily mobilized by an ISApl1 composite (IS30 family) transposon. The mcr-1 gene confers colistin resistance by encoding a phosphoethanolamine transferase that catalyzes the addition of a phosphoethanolamine moiety to lipid A in the bacterial outer membrane. MCR-1 confers resistance by modifying the colistin target, catalyzing transfer of phosphoethanolamine (PEA) onto the glucosamine saccharide of lipid A in the bacterial outer membrane. This reduces the net negative charge of the lipid A head group and, consequently, colistin binding.
+Erm proteins are part of the RNA methyltransferase family and methylate A2058 (E. coli nomenclature) of the 23S ribosomal RNA conferring degrees of resistance to Macrolides, Lincosamides and Streptogramin b. This is called the MLSb phenotype.
+
+ErmB confers the MLSb phenotype. Similar to ErmC, expression of ErmB is inducible by erythromycin. The leader peptide causes attenuation of the mRNA and stabilizes the structure preventing further translation. When erythromycin is present, it binds the leader peptide causing a change in conformation allowing for the expression of ErmB.
+
+Macrolides are a group of drugs (typically antibiotics) that have a large macrocyclic lactone ring of 12-16 carbons to which one or more deoxy sugars, usually cladinose and desosamine, may be attached. Macrolides bind to the 50S-subunit of bacterial ribosomes, inhibiting the synthesis of vital proteins.
+
+Streptogramin antibiotics are natural products produced by various members of the Streptomyces genus. These antibiotics bind to the P site of the 50S subunit of bacterial ribosomes to inhibit protein synthesis. The family consists of two subgroups, type A and type B, which are simultaneously produced by the same bacterial species in a ratio of roughly 70:30.
+
+Streptogramin A antibiotics are cyclic polyketide peptide hybrids that bind to the ribosomal peptidyl transfer centre. Structural variation arises from substituting a proline for its desaturated derivative and by its substitution for Ala or Cys. Used alone, streptogramin A antibiotics are bacteriostatic, but is bactericidal when used with streptogramin B antibiotics.
+
+Streptogramin B antibiotics are are cyclic hepta- or hexa-depsipeptides. Type B streptogramins block the peptide exit tunnel of the 50S bacterial ribosome. The general composition of group B streptogramins is 3-hydroxypicolinic acid-L-Thr-D-aminobutyric acid (or D-Ala)-L-Pro-L-Phe (or 4-N-,N-(dimethylamino)-L-Phe)-X-L-phenylglycine. Used alone, streptogramin B antibiotics are bacteriostatic, but is bactericidal when used with streptogramin A antibiotics.
+
+Lincosamides (e.g. lincomycin, clindamycin) are a class of drugs which bind to the 23s portion of the 50S subunit of bacterial ribosomes. This interaction inhibits early elongation of peptide chains by inhibiting the transpeptidase reaction, acting similarly to macrolides.
 
 # Table of Contents
 
@@ -21,22 +34,20 @@ mcr genes enocde an LPS-modifying enzyme and are mobilized on a variety of plasm
 
 Curate starting sequences. Source from NCBI's refgene database.
 
-### a. Find and retrieve sequences (May 24th, 2023)
+### a. Find and retrieve sequences (Oct 6th, 2023)
 
-There are 10 classes of mcr genes (mcr-1 thru mcr-10) with multiple squence variants (alleles) per class. They are designated as mcr 1.1, mcr 1.2, mcr 2.1, mcr 2.2, and etc.
+Multilple classes or erm genes as letters:
+A, B, C, D, E, F, G, H, K, N, O, Q, R, S, T, U, V, W, X, Y, Z
+and some are numbered between 30 and 50 ie erm(42).
 
-*note 3.30 allele missing from the consecutive order.*
-
-Search for mcr genes at ncbi refgene database returned 108 results
-https://www.ncbi.nlm.nih.gov/pathogens/refgene/#mcr
+Search for erm genes at ncbi refgene database returned 100 results
+https://www.ncbi.nlm.nih.gov/pathogens/refgene/#erm
 
 Use the Download button, select "Dataset (.zip)" from the drop down menu, and check the "Reference protein" box to download (reference_protein.faa)
 
-We also know that the eptA gene is a phosphoethanolamine transferase related to the mcr genes.
+Renamed fasta sequences with Sublime text editor find and replace regular expressions to create shorter format ex: >WP_055641627.1_Erm30_Streptomyces
 
-I retrieved the uniprot amino acid sequence for eptA from Ecoli (P30845|EPTA_ECOLI, A0A0H3JML2|EPTA_ECO57), Helicobacter pylori (O24867|EPTA_HELPY) and Salmonella typhimurium (P36555|EPTA_SALTY) as well since the mcr's appear to come from eptA. based on literature and based on a first round of uniprot blast searches with the ncbi mcr refgenes.
-
-Download fasta sequences and rename files. Collect the set of renamed fasta formatted sequences into a single file for amino acid sequence. These are referred to as the curated or reference sequences (mcr_SeedSeqs.faa)
+Collect the set of renamed fasta formatted sequences into a single file for amino acid sequence. These are referred to as the curated or reference sequences (erm_SeedSeqs.faa)
 
 ### b. Explore sequence diversity
 
@@ -51,25 +62,25 @@ Use EBI Clustalo https://www.ebi.ac.uk/Tools/msa/clustalo/
 1. Select result summary tab.
 1. Download the pim file (PIM) for the percent identity matrix.
 
-#### Multiple sequence alignment of mcr seed sequences.
+#### Multiple sequence alignment of erm seed sequences.
 
-![Multiple sequence alignment of mcr seed sequences.](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/03_erm/00_figures/00a_mcr_SeedSeqs_msa.png)
+![Multiple sequence alignment of erm seed sequences.](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/03_erm/00_figures/00a_erm_SeedSeqs_msa.png)
 
 Multiple sequence alignment image produced with AliView highlighting majority rule concensus characters.
 
-#### Neighbor joining phylogenetic tree of mcr seed sequences.
+#### Neighbor joining phylogenetic tree of erm seed sequences.
 
-![Neighbor joining phylogenetic tree of mcr seed sequences.](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/03_erm/00_figures/00b_mcr_SeedSeqs_tree.png)
+![Neighbor joining phylogenetic tree of erm seed sequences.](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/03_erm/00_figures/00b_erm_SeedSeqs_tree.png)
 
 Neighbor joining phylogenetic tree image produced with FigTree default settings.
 
-#### Percent sequence identity matrix hierarchical clustered heatmap of mcr seed sequences.
+#### Percent sequence identity matrix hierarchical clustered heatmap of erm seed sequences.
 
 ```bash
-python /ROCkIn/02_Python/00a_PIM_clustered_heatmap.py -i mcr_SeedSeqs.faa.aln.pim -o mcr_SeedSeqs.faa.aln.pim.pdf
+python /ROCkIn/02_Python/00a_PIM_clustered_heatmap.py -i erm_SeedSeqs.faa.aln.pim -o erm_SeedSeqs.faa.aln.pim.pdf
 ```
 
-![Multiple sequence alignment of mcr seed sequences.](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/03_erm/00_figures/00c_mcr_SeedSeqs_pim.png)
+![Multiple sequence alignment of erm seed sequences.](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/03_erm/00_figures/00c_erm_SeedSeqs_pim.png)
 
 Neighbor joining phylogenetic tree image produced with FigTree default settings.
 
@@ -77,11 +88,11 @@ Neighbor joining phylogenetic tree image produced with FigTree default settings.
 
 Review the multiple alignment and/or phylogenetic tree and/or heatmap and select representative sequences (i.e., remove highly similar sequences). We will use these curated sequences for a sequence search in uniprot and will not gain anything from sequences that are too similar (i.e. ≥ 90% sequence identity or one sequence from each strongly formed clade).
 
-Create a new fasta file with selected representative sequences (mcr_SeedSeqs.faa). In this case I've selected the first allele for mcr-1 thru mcr-10 (mcr-1.1, etc.) as well as mcr-3.8, 3.17, EPTA_HELPY, EPTA_SALTY, and EPTA_ECOLI.
+Create a new fasta file with selected representative sequences (NCBI_erm_reps.faa). See file for selection. Using NCBI_erm_proteins.faa.pim.pdf, I selected one representive from each light orange (highly similar) rectangular box (sequence cluster). 53 out of 100 sequences.
 
 # Step 01: UniProt sequence search
 
-Run a search of the curated mcr sequences (RefSeqs) against the UniProt database.
+Run a search of the curated erm sequences (RefSeqs) against the UniProt database.
 This is to look for extended sequence diversity.
 
 ```bash
@@ -94,7 +105,7 @@ mkdir 00a_log 01a_ebi_blast 01b_ebi_dat 01c_ebi_fasta
 This step returns UniProt IDs for blast sequence matches.
 
 ```bash
-sbatch --export fasta=mcr_SeedSeqs.faa /ROCkIn/01b_Sbatch/01a_ebi_blast.sbatch
+sbatch --export fasta=erm_SeedSeqs.faa /ROCkIn/01b_Sbatch/01a_ebi_blast.sbatch
 
 # move files into folder to keep clean organization
 mv *.txt 01a_ebi_blast/
@@ -113,15 +124,15 @@ for f in 01a_ebi_blast/*; do odir='01b_ebi_dat'; gene=`basename $f | cut -d. -f1
 for d in 01b_ebi_dat/*; do n=`basename $d`; echo $n; python ../ROCkIn/02_Python/01d_parse_dat_file.py -i $d -o 01c_ebi_fasta/${n}.fasta; done
 
 # concatenate gene fastas into single fasta file
-cat 01c_ebi_fasta/*.fasta >> 01d_mcr_all_ebi_matches.fa
+cat 01c_ebi_fasta/*.fasta >> 01d_erm_all_ebi_matches.fa
 
 # count 'em
-grep -c '>' 01d_mcr_all_ebi_matches.fa
+grep -c '>' 01d_erm_all_ebi_matches.fa
 ```
 
 **Results:**
 
-- 13,067 fasta sequences returned from blast search
+- 53,000 fasta sequences returned from blast search
 
 # Step 02: Deduplicate, filter, dereplicate
 
@@ -130,14 +141,14 @@ grep -c '>' 01d_mcr_all_ebi_matches.fa
 Since we have multiple verified sequences that we searched to UniProt, we likely have found overlapping search results. Concatenate fasta files of all search result sequences and deduplicate by UniProt ID. I wrote a Python script to deduplicate the concatenated fasta
 
 ```bash
-python /ROCkIn/02_Python/02a_Remove_Duplicate_Fasta_Entries.py -f 01d_mcr_all_ebi_matches.fa -o 02a_mcr_matches_dedup.fa
+python /ROCkIn/02_Python/02a_Remove_Duplicate_Fasta_Entries.py -f 01d_erm_all_ebi_matches.fa -o 02a_erm_matches_dedup.fa
 ```
 
 **Results:**
 
-- Total sequences in file: 13067
-- Duplicates Removed: 7640
-- Unique sequences retained: 5427
+- Total sequences in file: 53000
+- Duplicates Removed: 46151
+- Unique sequences retained: 6849
 
 ### b. Filter
 
@@ -153,41 +164,41 @@ This script outputs 100% sequence matches separately as well in tabular blast, f
 
 The script also plots histograms of each parameter post filtering and can be rerun with different filtering options if neccessary.
 
-I wrapped it into an sbatch script. This step produces the 02b_filter output directory containing the filtered tabular BLAST output file 02b_mcr_matches_fltrdBstHts.fa which is used downstream. It also contains several diagnostic histograms which provide a visual representation of the sequence search results and can be used to modify the filtering settings if necessary.
+I wrapped it into an sbatch script. This step produces the 02b_filter output directory containing the filtered tabular BLAST output file 02b_erm_matches_fltrdBstHts.fa which is used downstream. It also contains several diagnostic histograms which provide a visual representation of the sequence search results and can be used to modify the filtering settings if necessary.
 
-The 02b_filter output directory also contains the file 02b_mph_matches_pID100_list.txt. This file is used to identify UniProt IDs that have 100% Sequence Similarity with the SeedSeqs. The input to ROCkOut is UniProt IDs but we retrieved our SeedSeqs from NCBI. We use this file to select 1 UniProt ID for each SeedSeq to include in the *Training set* set list.
+The 02b_filter output directory also contains the file 02b_erm_matches_pID100_list.txt. This file is used to identify UniProt IDs that have 100% Sequence Similarity with the SeedSeqs. The input to ROCkOut is UniProt IDs but we retrieved our SeedSeqs from NCBI. We use this file to select 1 UniProt ID for each SeedSeq to include in the *Training set* set list.
 
 ```bash
-sbatch --export ref=mcr_SeedSeqs.faa,qry=02a_mcr_matches_dedup.fa,out=02b_mcr_matches /ROCkIn/01b_Sbatch/02b_Blastp.sbatch
+sbatch --export ref=erm_SeedSeqs.faa,qry=02a_erm_matches_dedup.fa,out=02b_erm_matches /ROCkIn/01b_Sbatch/02b_Blastp.sbatch
 
 cat 00a_log/02b_BlastP.out
 ```
 
 **Results:**
 
-- Total number of entries in blast file: 55073
-- Number of entries failing the filters: 6195
-- Number of entries passing the filters: 48878
-- Number of duplicate blast matches passing filter to remove: 43451
-- Number of best hit entries written to new file: 5427 
+- Total number of entries in blast file: 69292
+- Number of entries failing the filters: 22411
+- Number of entries passing the filters: 46881
+- Number of duplicate blast matches passing filter to remove: 40054
+- Number of best hit entries written to new file: 6827 
 
-![Diagnostic histograms of sequence search results](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/03_erm/00_figures/02a_diagnostic_histograms.png)
+![Diagnostic histograms of sequence search results](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/03_erm/00_figures/02a_erm_diagnostic_histograms.png)
 
 ### c. Dereplicate - similar sequence clustering with MMSeqs2
 
-5427 sequences is way more than we need. Let's dereplicate the set some.
+6827 sequences is way more than we need. Let's dereplicate the set some.
 
 Use mmseqs to generate sequence clusters of 90% amino acid sequence similarity and select cluster representatives. These representative sequences are used for the *Training set* set sequences to build the ROCker models with ROCkOut.
 
 ```bash
-sbatch --export infile=02b_mcr_matches_fltrdBstHts.fa,oDir=02c_dereplicate_90,ss=90 ../ROCkIn/01b_Sbatch/02c_mmseqs.sbatch
+sbatch --export infile=02b_erm_matches_fltrdBstHts.fa,oDir=02c_dereplicate_90,ss=90 ../ROCkIn/01b_Sbatch/02c_mmseqs.sbatch
 
 grep -c '>' 02c_dereplicate_90/02_mmseqs_reps.fasta
 ```
 
 **Results:**
 
-- Representative sequences retained: 1458
+- Representative sequences retained: 3348
 
 ### d. Select secondary cluster representatives to create a *Testing set*
 
@@ -196,7 +207,7 @@ mmseqs outputs a fasta file of cluster representatives which we will make our se
 By default a random seed is not set for this script so the secondary representative selection is chosen randomly from each cluster each time the script is rerun (excluding the primary cluster representative selected by mmseqs2). use the optional -s parameter to set a fixed seed for reproducible "random" selections.
 
 ```bash
-python ../ROCkIn/02_Python/02d_Get_Test_secReps.py -f 02b_mcr_matches_fltrdBstHts.fa -c 02c_dereplicate_90/02c_mmseqs_results_90.tsv -o 02f_mmseq90
+python ../ROCkIn/02_Python/02d_Get_Test_secReps.py -f 02b_erm_matches_fltrdBstHts.fa -c 02c_dereplicate_90/02c_mmseqs_results_90.tsv -o 02f_mmseq90
 
 mkdir 02d_secReps_testSets
 
@@ -207,7 +218,7 @@ grep -c '>' 02d_secReps_testSets/02f_mmseq90_secReps.fa
 
 **Results:**
 
-- Secondary representative sequences retained: 473
+- Secondary representative sequences retained: 788
 
 #### We now have fasta files for two sets of sequences:
 
@@ -229,14 +240,14 @@ I put the commands into an sbatch script
 ```bash
 # training set
 
-sbatch --export verified=mcr_SeedSeqs.faa,newseqs=02c_dereplicate_90/02c_mmseqs_reps_90.fasta /ROCkIn/01b_Sbatch/03a_seq_alignment.sbatch
+sbatch --export verified=erm_SeedSeqs.faa,newseqs=02c_dereplicate_90/02c_mmseqs_reps_90.fasta /ROCkIn/01b_Sbatch/03a_seq_alignment.sbatch
 
 # sequences before trimming
 grep -c '>' 03_ROCkIn_Results/03a_mmseqs_reps_90.fasta.aln
 
 # testing set
 
-sbatch --export verified=mcr_SeedSeqs.faa,newseqs=02d_secReps_testSets/02f_mmseq90_secReps.fa /ROCkIn/01b_Sbatch/03a_seq_alignment.sbatch
+sbatch --export verified=erm_SeedSeqs.faa,newseqs=02d_secReps_testSets/02f_mmseq90_secReps.fa /ROCkIn/01b_Sbatch/03a_seq_alignment.sbatch
 
 # sequences before trimming
 grep -c '>' 03_ROCkIn_Results/03a_mmseq90_secReps.fa.aln
@@ -244,8 +255,8 @@ grep -c '>' 03_ROCkIn_Results/03a_mmseq90_secReps.fa.aln
 
 **Results:**
 
-- Sequences before trimming: 1473 (1458 searched + 15 SeedSeqs)
-- Sequences before trimming: 488 (473 searched + 15 SeedSeqs)
+- Training set sequences before trimming: 3401 (3348 searched + 53 curated)
+- Testing set sequences before trimming: 841 (788 searched + 53 curated)
 
 ### b. trim
 
@@ -261,14 +272,69 @@ Before using trimmal, it is good to review the MSA and remove (or at least flag)
 - check large gaps in the alignment to see if only 1 or a few sequences are responsible for creating the gap and consider removing them.
 
 ##### training set Removed the following prior to trimming: too long or bad alignment
-- A0A077Z953_TRITR//Probable transcriptional regulator ycf27//Trichuris trichiura (Whipworm) (Trichocephalus trichiurus)//Unreviewed//Eukaryota;Metazoa;Ecdy
-- Q7VH02_HELHP//Phosphatidic acid phosphatase type 2/haloperoxidase domain-containing protein//Helicobacter hepaticus (strain ATCC 51449 / 3B1)//Unreviewed/
-- A0A7Z7MUD9_9PROT//Membrane-associated, metal-dependent hydrolase (Modular protein)//Sterolibacterium denitrificans//Unreviewed//Bacteria;Pseudomonadota;Betaproteobact
-A0A4Q3HK81_9HYPH//Phosphoethanolamine transferase//Hyphomicrobiales bacterium//Unreviewed//Bacteria;Pseudomonadota;Alphaproteobacteria;Hyphomicrobiales
-- A0A1H9NI52_9PSED//Lipid A ethanolaminephosphotransferase//Pseudomonas sp. NFACC02//Unreviewed//Bacteria;Pseudomonadota;Gammaproteobacteria;Pseudomonada
+- A0A2Z7AX87_9LAMI//rRNA adenine N(6)-methyltransferase//Dorcoceras hygrometricum//Unreviewed//Eukaryota;Viridiplantae;Streptophyta;Embryophyta;Tracheophyta;Spermatophyta;Magnoliopsida;eudicotyledons;Gunneridae;Pentapetalae;asterids;lamiids;Lamiales;Gesneriaceae;Didymocarpoideae;Trichosporeae;Loxocarpinae;Dorcoceras
+- A0A6P2BP56_9ACTN//MarR family transcriptional regulator//Trebonia kvetii//Unreviewed//Bacteria;Actinomycetota;Actinomycetes;Streptosporangiales;Treboniaceae;Trebonia
+- A0A3E1E6Z1_UNCVE//Ribosomal RNA small subunit methyltransferase A//Verrucomicrobiota bacterium//Unreviewed//Bacteria;Verrucomicrobiota
+- A0A4Y3QYE4_STRCI//Ribosomal RNA adenine methylase transferase N-terminal domain-containing protein//Streptomyces cacaoi//Unreviewed//Bacteria;Actinomycetota;Actinomycetes;Kitasatosporales;Streptomycetaceae;Streptomyces
+- A0A366IGD5_9MICO//16S rRNA A1518/A1519 N6-dimethyltransferase RsmA/KsgA/DIM1 with predicted DNA glycosylase/AP lyase activity//Brevibacterium celere//Unreviewed//Bacteria;Actinomycetota;Actinomycetes;Micrococcales;Brevibacteriaceae;Brevibacterium
+- A0A835VST4_CHLIN//rRNA adenine N(6)-methyltransferase//Chlamydomonas incerta//Unreviewed//Eukaryota;Viridiplantae;Chlorophyta;core;chlorophytes;Chlorophyceae;CS;clade;Chlamydomonadales;Chlamydomonadaceae;Chlamydomonas
+- D8U5E8_VOLCA//rRNA adenine N(6)-methyltransferase//Volvox carteri f. nagariensis//Unreviewed//Eukaryota;Viridiplantae;Chlorophyta;core;chlorophytes;Chlorophyceae;CS;clade;Chlamydomonadales;Volvocaceae;Volvox
+- A0A7X3QJ76_9CHLR//Methyltransferase domain-containing protein//Dehalococcoidia bacterium//Unreviewed//Bacteria;Chloroflexota;Dehalococcoidia
+- A0A1J6JHA5_NICAT//rRNA adenine N(6)-methyltransferase//Nicotiana attenuata (Coyote tobacco)//Unreviewed//Eukaryota;Viridiplantae;Streptophyta;Embryophyta;Tracheophyta;Spermatophyta;Magnoliopsida;eudicotyledons;Gunneridae;Pentapetalae;asterids;lamiids;Solanales;Solanaceae;Nicotianoideae;Nicotianeae;Nicotiana
+- A0A1D7VZG3_9MICO//23S rRNA N-6-methyltransferase ErmCX//Brevibacterium aurantiacum//Unreviewed//Bacteria;Actinomycetota;Actinomycetes;Micrococcales;Brevibacteriaceae;Brevibacterium
+- A0A7S0YCY7_9CHLO//rRNA adenine N(6)-methyltransferase//Polytomella parva//Unreviewed//Eukaryota;Viridiplantae;Chlorophyta;core;chlorophytes;Chlorophyceae;CS;clade;Chlamydomonadales;Chlamydomonadaceae;Polytomella
+- A0A3Q9P1T6_BRELN//23S ribosomal RNA methyltransferase Erm//Brevibacterium linens//Unreviewed//Bacteria;Actinomycetota;Actinomycetes;Micrococcales;Brevibacteriaceae;Brevibacterium
+- A0A357G7I8_9BACT//Ribosomal RNA small subunit methyltransferase A//Candidatus Moranbacteria bacterium//Unreviewed//Bacteria;Candidatus;Moranbacteria
+- A0A7J3FE97_9EURY//Probable ribosomal RNA small subunit methyltransferase A//Hadesarchaea archaeon//Unreviewed//Archaea;Euryarchaeota;
+- A0A415N4Z1_9BACE//23S rRNA (Adenine(2058)-N(6))-methyltransferase Erm(F)//Bacteroides intestinalis//Unreviewed//Bacteria;Bacteroidota;Bacteroidia;Bacteroidales;Bacteroidaceae;Bacteroides
+- A0A8T2D6B7_9BRAS//rRNA adenine N(6)-methyltransferase//Arabidopsis thaliana x Arabidopsis arenosa//Unreviewed//Eukaryota;Viridiplantae;Streptophyta;Embryophyta;Tracheophyta;Spermatophyta;Magnoliopsida;eudicotyledons;Gunneridae;Pentapetalae;rosids;malvids;Brassicales;Brassicaceae;Camelineae;Arabidopsis
+- A0A1H1LQ27_9MICO//23S rRNA (Adenine-N6)-dimethyltransferase//Brevibacterium siliguriense//Unreviewed//Bacteria;Actinomycetota;Actinomycetes;Micrococcales;Brevibacteriaceae;Brevibacterium
+- A0A3A9EMS7_9FIRM//rRNA adenine N-6-methyltransferase//Acutalibacter sp. 1XD8-33//Unreviewed//Bacteria;Bacillota;Clostridia;Eubacteriales;Oscillospiraceae;Acutalibacter
+- A0A505H275_9MICO//23S ribosomal RNA methyltransferase Erm//Brevibacterium sp. XM4083//Unreviewed//Bacteria;Actinomycetota;Actinomycetes;Micrococcales;Brevibacteriaceae;Brevibacterium
+- A0A535YTR2_UNCCH//Ribosomal RNA small subunit methyltransferase A//Chloroflexota bacterium//Unreviewed//Bacteria;Chloroflexota
+- A0A9Q8VGH8_BIFLN//23S ribosomal RNA methyltransferase Erm//Bifidobacterium longum subsp. longum//Unreviewed//Bacteria;Actinomycetota;Actinomycetes;Bifidobacteriales;Bifidobacteriaceae;Bifidobacterium
+- A0A7K0DSU7_9NOCA//Methyltransferase domain-containing protein//Nocardia aurantia//Unreviewed//Bacteria;Actinomycetota;Actinomycetes;Mycobacteriales;Nocardiaceae;Nocardia
+- A0A0B9A5J3_BRELN//rRNA (Adenine-N(6)-)-methyltransferase//Brevibacterium linens//Unreviewed//Bacteria;Actinomycetota;Actinomycetes;Micrococcales;Brevibacteriaceae;Brevibacterium
+- A0A7J8R4L5_GOSDV//rRNA adenine N(6)-methyltransferase//Gossypium davidsonii (Davidson's cotton)//Unreviewed//Eukaryota;Viridiplantae;Streptophyta;Embryophyta;Tracheophyta;Spermatophyta;Magnoliopsida;eudicotyledons;Gunneridae;Pentapetalae;rosids;malvids;Malvales;Malvaceae;Malvoideae;Gossypium
+- K9AJW4_9MICO//rRNA (Adenine-N(6)-)-methyltransferase//Brevibacterium casei S18//Unreviewed//Bacteria;Actinomycetota;Actinomycetes;Micrococcales;Brevibacteriaceae;Brevibacterium
+- A0A4Z0K3U7_9MICO//23S ribosomal RNA methyltransferase Erm//Brevibacterium sp. S22//Unreviewed//Bacteria;Actinomycetota;Actinomycetes;Micrococcales;Brevibacteriaceae;Brevibacterium
+- A0A7K3C0P0_9ACTN//23S ribosomal RNA methyltransferase Erm//Streptomyces sp. SID4919//Unreviewed//Bacteria;Actinomycetota;Actinomycetes;Kitasatosporales;Streptomycetaceae;Streptomyces
+- A0A1S6RVP3_STRHY//Methyltransferase type 11//Streptomyces hygroscopicus//Unreviewed//Bacteria;Actinomycetota;Actinomycetes;Kitasatosporales;Streptomycetaceae;Streptomyces;Streptomyces;violaceusniger;group
+- Q3YBQ1_MYCGD//Erm(38)go//Mycolicibacterium goodii (Mycobacterium goodii)//Unreviewed//Bacteria;Actinomycetota;Actinomycetes;Mycobacteriales;Mycobacteriaceae;Mycolicibacterium
+- A0A1Q8W8A8_9ACTO//Ribosomal RNA small subunit methyltransferase A//Actinomyces oris//Unreviewed//Bacteria;Actinomycetota;Actinomycetes;Actinomycetales;Actinomycetaceae;Actinomyces
+- A0A0M8KR36_9MICO//Ribosomal RNA large subunit methyltransferase A//Brachybacterium sp. SW0106-09//Unreviewed//Bacteria;Actinomycetota;Actinomycetes;Micrococcales;Dermabacteraceae;Brachybacterium
+- A0QSY6_MYCS2//Ribosomal RNA adenine dimethylase family protein//smegmatis)//Unreviewed//Bacteria;Actinomycetota;Actinomycetes;Mycobacteriales;Mycobacteriaceae;Mycolicibacterium
+- A0A7W7FXK1_9PSEU//23S rRNA (Adenine-N6)-dimethyltransferase//Crossiella cryophila//Unreviewed//Bacteria;Actinomycetota;Actinomycetes;Pseudonocardiales;Pseudonocardiaceae;Crossiella
+- A0A2A3ZK94_9MICO//Ribosomal RNA adenine dimethylase//Brevibacterium aurantiacum//Unreviewed//Bacteria;Actinomycetota;Actinomycetes;Micrococcales;Brevibacteriaceae;Brevibacterium
+- A0A4Z0IX04_9MICO//23S ribosomal RNA methyltransferase Erm//Brevibacterium sp. S111//Unreviewed//Bacteria;Actinomycetota;Actinomycetes;Micrococcales;Brevibacteriaceae;Brevibacterium
+- A0A2A9J3S1_SACEN//23S rRNA (Adenine-N6)-dimethyltransferase//NBRC 13426 / NCIMB 8594 / NRRL 2338)//Unreviewed//Bacteria;Actinomycetota;Actinomycetes;Pseudonocardiales;Pseudonocardiaceae;Saccharopolyspora
+- A0A7I8L383_SPIIN//rRNA adenine N(6)-methyltransferase//Spirodela intermedia (Intermediate duckweed)//Unreviewed//Eukaryota;Viridiplantae;Streptophyta;Embryophyta;Tracheophyta;Spermatophyta;Magnoliopsida;Liliopsida;Araceae;Lemnoideae;Spirodela
+- A0A2G6C1S7_9BACT//Ribosomal RNA adenine methylase transferase N-terminal domain-containing protein//Candidatus Saccharibacteria bacterium//Unreviewed//Bacteria;Candidatus;Saccharibacteria
+- A0A5C4WYS9_9MICO//23S ribosomal RNA methyltransferase Erm//Brevibacterium sediminis//Unreviewed//Bacteria;Actinomycetota;Actinomycetes;Micrococcales;Brevibacteriaceae;Brevibacterium
+- A0A087GEK6_ARAAL//rRNA adenine N(6)-methyltransferase//Arabis alpina (Alpine rock-cress)//Unreviewed//Eukaryota;Viridiplantae;Streptophyta;Embryophyta;Tracheophyta;Spermatophyta;Magnoliopsida;eudicotyledons;Gunneridae;Pentapetalae;rosids;malvids;Brassicales;Brassicaceae;Arabideae;Arabis
+- A0A846RWZ6_9MICO//23S rRNA (Adenine-N6)-dimethyltransferase//Brevibacterium marinum//Unreviewed//Bacteria;Actinomycetota;Actinomycetes;Micrococcales;Brevibacteriaceae;Brevibacterium
+- A0A3S4VFP4_ACTVI//Ribosomal RNA small subunit methyltransferase A//Actinomyces viscosus//Unreviewed//Bacteria;Actinomycetota;Actinomycetes;Actinomycetales;Actinomycetaceae;Actinomyces
 
 ##### testing set Removed the following prior to trimming: too long or bad alignment
-- A0A0S4PZP7_9HELI//Phosphatidic acid phosphatase type 2/haloperoxidase domain-containing protein//Helicobacter typhlonius//Unreviewed//Bacteria;Pseudomonadota;
+- DIM1B_ARATH//Ribosomal RNA small subunit methyltransferase, mitochondrial//Arabidopsis thaliana (Mouse-ear cress)//Reviewed//Eukaryota;Viridiplantae;Streptophyta;Embryophyta;Tracheophyta;Spermatophyta;Magnoliopsida;eudicotyledons;Gunneridae;Pentapetalae;rosids;malvids;Brassicales;Brassicaceae;Camelineae;Arabidopsis
+- A0A1Q8VVB9_9ACTO//Ribosomal RNA small subunit methyltransferase A//Actinomyces oris//Unreviewed//Bacteria;Actinomycetota;Actinomycetes;Actinomycetales;Actinomycetaceae;Actinomyces
+- A0A1C6LXV2_9ACTN//23S rRNA (Adenine-N6)-dimethyltransferase//Streptomyces sp. AmelKG-E11A//Unreviewed//Bacteria;Actinomycetota;Actinomycetes;Kitasatosporales;Streptomycetaceae;Streptomyces
+- ERME_SACEN//rRNA adenine N-6-methyltransferase//NBRC 13426 / NCIMB 8594 / NRRL 2338)//Reviewed//Bacteria;Actinomycetota;Actinomycetes;Pseudonocardiales;Pseudonocardiaceae;Saccharopolyspora
+- A0A2H1JFU0_9MICO//23S rRNA (Adenine-N6)-dimethyltransferase//Brevibacterium casei CIP 102111//Unreviewed//Bacteria;Actinomycetota;Actinomycetes;Micrococcales;Brevibacteriaceae;Brevibacterium
+- A0A1H1QFZ7_9MICO//23S rRNA (Adenine-N6)-dimethyltransferase//Brevibacterium sandarakinum//Unreviewed//Bacteria;Actinomycetota;Actinomycetes;Micrococcales;Brevibacteriaceae;Brevibacterium
+- A0A2H1K329_9MICO//Ribosomal RNA adenine dimethylase//Brevibacterium sp. 239c//Unreviewed//Bacteria;Actinomycetota;Actinomycetes;Micrococcales;Brevibacteriaceae;Brevibacterium
+- A0A7T4DKC8_9MICO//23S ribosomal RNA methyltransferase Erm//Brevibacterium casei//Unreviewed//Bacteria;Actinomycetota;Actinomycetes;Micrococcales;Brevibacteriaceae;Brevibacterium
+- A0A835WJB0_9CHLO//rRNA adenine N(6)-methyltransferase//Chlamydomonas schloesseri//Unreviewed//Eukaryota;Viridiplantae;Chlorophyta;core;chlorophytes;Chlorophyceae;CS;clade;Chlamydomonadales;Chlamydomonadaceae;Chlamydomonas
+- A0A2P5X1X4_GOSBA//rRNA adenine N(6)-methyltransferase//Gossypium barbadense (Sea-island cotton) (Egyptian cotton)//Unreviewed//Eukaryota;Viridiplantae;Streptophyta;Embryophyta;Tracheophyta;Spermatophyta;Magnoliopsida;eudicotyledons;Gunneridae;Pentapetalae;rosids;malvids;Malvales;Malvaceae;Malvoideae;Gossypium
+- Q8G8B3_MYCSM//Adenine rRNA methylase//Mycolicibacterium smegmatis (Mycobacterium smegmatis)//Unreviewed//Bacteria;Actinomycetota;Actinomycetes;Mycobacteriales;Mycobacteriaceae;Mycolicibacterium
+- W8E1A5_9ACTN//Putative rRNA methyltransferase//Streptomyces sp. ME-1//Unreviewed//Bacteria;Actinomycetota;Actinomycetes;Kitasatosporales;Streptomycetaceae;Streptomyces
+- E2IFL5_9BACT//Putative rRNA methyltransferase//uncultured bacterium//Unreviewed//Bacteria;environmental;samples
+- E2IFM1_9BACT//Putative rRNA methyltransferase//uncultured bacterium//Unreviewed//Bacteria;environmental;samples
+- E2IFK8_9BACT//Putative rRNA methyltransferase//uncultured bacterium//Unreviewed//Bacteria;environmental;samples
+- A0A2H0B3B0_9BACT//Ribosomal RNA adenine methylase transferase N-terminal domain-containing protein//CG23_combo_of_CG06-09_8_20_14_all_47_9//Unreviewed//Bacteria;Candidatus;Beckwithbacteria
+- A0A8U0LGE4_BIFLN//rRNA adenine N-6-methyltransferase//Bifidobacterium longum subsp. longum//Unreviewed//Bacteria;Actinomycetota;Actinomycetes;Bifidobacteriales;Bifidobacteriaceae;Bifidobacterium
+
+*Removed the fasta sequences from 02c_mmseqs_reps_90.fasta (training set) and 02f_mmseq90_secReps.fa (testing set) and reran the alignment in step A after removing the above sequences from the fasta files and then trimmed after realignment.*
 
 ```bash
 # training set
@@ -286,8 +352,8 @@ grep -c '>' 03_ROCkIn_Results/03b_mmseq90_secReps.trimmed.aln
 
 **Results:**
 
-- Training set sequences after trimming: 1471
-- Testing set sequences after trimming: 480
+- Training set sequences after trimming: 3358
+- Testing set sequences after trimming: 667
 
 ### c. clean up seq names for clean tree leaves
 
@@ -358,34 +424,40 @@ python ../ROCkIn/02_Python/03c_Plot_Annotated_Tree_v2.py -a 03_ROCkIn_Results/03
 ```
 
 #### Training set - clade/cluster labeled tree
-![Training set tree](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/03_erm/00_figures/03a_training_set_tree.png)
+
+The below image is the default IQTree and clade/cluster labeling from the 03c_Plot_Annotated_Tree_v2.py script. This script uses the HDBSCAN algorithm to guess at gene clades/clusters. An all vs all distance matrix of tree branch lengths is computed and used as input to HDBSCAN. This labeling is intended as a predicted starting point and is used to label and order the genes in the corresponding output 03h_Gene_Data_90_annotated.tsv data file. The researcher can change the labels in the data file and rerun the 03c plotting script as needed.
+
+![Training set tree](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/03_erm/00_figures/03a_erm_training_set_tree.png)
 
 #### Testing set - clade/cluster labeled tree
-![Testing set tree](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/03_erm/00_figures/03b_training_set_tree.png)
+
+The below image is the default IQTree and clade/cluster labeling from the 03c_Plot_Annotated_Tree_v2.py script. This script uses the HDBSCAN algorithm to guess at gene clades/clusters. An all vs all distance matrix of tree branch lengths is computed and used as input to HDBSCAN. This labeling is intended as a predicted starting point and is used to label and order the genes in the corresponding output 03h_Gene_Data_90_annotated.tsv data file. The researcher can change the labels in the data file and rerun the 03c plotting script as needed.
+
+![Testing set tree](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/03_erm/00_figures/03b_erm_testing_set_tree.png)
 
 Review the Data Table and the Phylogenetic tree to make positive and negative UniProt ID selections to give to ROCkOut. Clade/Cluster labels can be changed in the tsv file and the tree can be replotted.
 
 - for the test set be sure to remove all the RepSeqs from the UniProt ID list.
 - for the training set remove any Gene Names that aren't a UniProt ID.
-- for the training set, look at 02b_filter/02b_mcr_matches_pID100.fa and include some sequences that 100% similar to any RepSeqs without a UniProt ID. You only need 1 per RepSeq. This will include some different genomes in the training set that have the identical copies.
+- for the training set, look at 02b_filter/02b_erm_matches_pID100.fa and include some sequences that 100% similar to any RepSeqs without a UniProt ID. You only need 1 per RepSeq. This will include some different genomes in the training set that have the identical copies.
 
 **Results**
 
 We decided to build two models:
 
-1. A model using all the genes in the *Training set* tree as positive references to make a model that captures all mcr genes and includes the epta genes because they share the same function. This model is useful for broad surveillance of eptA and mcr gene functions in microbial communities. We refer to this model as ermAll.
-1. A model focusing specifically on the MCR-1.1, MCR-2.1, MCR-6.1 gene clade of the *Training set* using only the sequences from this clade as positive references and using all other sequences as negative references. We refer to this model as ermB.
+1. A model using all the genes in the *Training set* tree as positive references to make a model that captures all erm genes. This model is useful for broad surveillance erm gene functions in microbial communities. We refer to this model as ermAll.
+1. A model focusing specifically on the ermB gene clade of the *Training set* using only the sequences from this clade as positive references and using all other sequences as negative references. We refer to this model as ermB.
 
 We make two similar similar selections for the *Testing set*:
 
 1. We select all genes in the *Testing set* to use as positive references. The genomes containing these genes will be used to create a mock metagenome to challenge the ermAll ROCker model.
-1. We select genes in the *Testing set* specifically from the MCR-1.1, MCR-2.1, MCR-6.1 gene clade. The genomes containing these genes will be used to create a mock metagenome to challenge the ermB ROCker model.
+1. We select genes in the *Testing set* specifically from the ermB gene clade. The genomes containing these genes will be used to create a mock metagenome to challenge the ermB ROCker model.
 
 # Step 04: Build ROCker models
 
 *I don't have the final figures yet. Waiting on Kenji to finalize the ROCkOut code.*
 
-Several genomes in this model have more than one mcr/epta/sulfatase gene in the genome that share considerable sequence similarity and conserved sites in the multiple sequence alignment. These additional gene copies were found by the ROCkIn workflow, but they were discluded during the dereplication step. They show up in the model labeled as orange non_target genes but they fall at or above the blue ROCker filter threshold. ROCkOut provides the genome, genomic position each simulated read came from, and the target gene's UniProt ID associated with the genome the read came from. We used this information to look up the genome on NCBI, track down the coordinates to retrieve the gene (amino acid) fasta sequence, and used UniProt BLAST+ search to find the associated UniProt ID. We check the multiple sequence alignments and annotation information before adding the UniProt ID of the additional gene copy to the positive target input list. We did this iterative process of tracking down genes for both training and testing sets.
+This is a paragraph about any modification to the input UniProt ID lists when building the ROCker model
 
 This is an iterative process of building a model, investigating the results, and tracking down all the peculiarities to arrive at a final postive and/or negative UniProt ID set.
 
@@ -587,7 +659,7 @@ two files 1) mock metagenome 2) hmmsearch result
 
 rocker results same thing but blastx results are split into passing and failing files.
 three files 1) mock metagenome 2) passing 3) failing
-from: /storage/home/hcoda1/9/rconrad6/scratch/ROCkOut/02_mcr/02a_ermB_train
+from: /storage/home/hcoda1/9/rconrad6/scratch/ROCkOut/02_erm/02a_ermB_train
 
 ```bash
 # ermAll model
@@ -839,9 +911,9 @@ cp model/shared_files/combined_genomes/combined_proteins_aa.fasta final_tree/
 # Clean seq names
 python 00_scripts/clean_seq_names.py -i final_tree/combined_proteins_aa.fasta
 
-# Create multiple alignment by first aligning the mcr SeedSeqs and then adding the combined proteins to the SeedSeq alignment.
+# Create multiple alignment by first aligning the erm SeedSeqs and then adding the combined proteins to the SeedSeq alignment.
 # using clustal omega version 1.2.4
-sbatch --export verified=mcr_SeedSeqs.faa,newseqs=combined_proteins_aa.fasta,output=final_tree_seqs.aln 00_scripts/seq_alignment.sbatch 
+sbatch --export verified=erm_SeedSeqs.faa,newseqs=combined_proteins_aa.fasta,output=final_tree_seqs.aln 00_scripts/seq_alignment.sbatch 
 
 # use Aliview to view and edit the multiple alignment.
 # Use Trimal to trim up the alignment.
