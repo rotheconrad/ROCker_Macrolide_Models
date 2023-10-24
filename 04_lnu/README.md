@@ -367,7 +367,7 @@ grep -c '>' 03_ROCkIn_Results/03b_mmseq90_secReps.trimmed.aln
 
 **Results:**
 
-- Training set sequences after trimming: 182
+- Training set sequences after trimming: 180
 - Testing set sequences after trimming: 50
 
 ### c. clean up seq names for clean tree leaves
@@ -437,6 +437,12 @@ python ../ROCkIn/02_Python/03c_Plot_Annotated_Tree_v2.py -a 03_ROCkIn_Results/03
 # testing set
 python ../ROCkIn/02_Python/03c_Plot_Annotated_Tree_v2.py -a 03_ROCkIn_Results/03i_Gene_Data_secRep_90_annotated.tsv -n 03_ROCkIn_Results/03c_mmseq90_secReps.treefile -o 03_ROCkIn_Results/03i_Predicted_Clades_Tree_secRep_90.pdf
 ```
+
+##### Found two long branches in the tree results
+- A0A7V9VD77_9CHLR
+- A0A969FB27_9CHLR
+
+Removed from the trimmed alignment and rebuilt tree.
 
 #### Training set - clade/cluster labeled tree
 
