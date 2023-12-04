@@ -488,11 +488,11 @@ mkdir 01a_lnuAll_train 01b_lnuAll_test 01c_alignment_label_testing
 
 # training set
 cd 01a_lnuAll_train
-sbatch --export odir=model,pos=lnuAll_train_positive.txt /ROCkOut/00b_sbatch/ROCkOut_posOnly.sbatch
+sbatch --export odir=model,pos=lnuAll_train_positive.txt,neg=lnuAll_train_negative.txt /ROCkOut/00b_sbatch/ROCkOut.sbatch
 
 # testing set
 cd 01b_lnuAll_test
-sbatch --export odir=model,pos=lnuAll_test_positive.txt /ROCkOut/00b_sbatch/ROCkOut_posOnly.sbatch
+sbatch --export odir=model,pos=lnuAll_test_positive.txt,pos=lnuAll_test_negative.txt /ROCkOut/00b_sbatch/ROCkOut.sbatch
 
 ######
 

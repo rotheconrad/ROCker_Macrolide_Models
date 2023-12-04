@@ -270,7 +270,7 @@ def score_blastx(bx, pos_reads, neg_reads, outdir):
     # check all positive reads are counted
     print('\n\nPositive read count from metagenome:', pos_total)
     print('\nPositive read count from Diamond/BlastX alignment:', pos_count)
-    pos_diff = pos_total - pos_count
+    pos_diff = pos_total - pos_count # positive reads not aligned
     print('Positive reads not aligned by BlastX:', pos_diff)
 
     # write the fasta files for each filter and category:
@@ -288,7 +288,7 @@ def score_blastx(bx, pos_reads, neg_reads, outdir):
         for val, fasta in neg_reads.items():
             o.write(fasta)
 
-    return data
+    return data, pos_diff
 
 
 def score_rocker(rp, rf, pos_reads, neg_reads, outdir):
@@ -490,7 +490,7 @@ def score_hmm(hm, pos_reads, neg_reads, outdir):
 
     # check all positive reads are counted
     print('\nPositive read count from hmmsearch:', pos_count)
-    pos_diff = pos_total - pos_count
+    pos_diff = pos_total - pos_count # positive reads not aligned
     print('Positive reads not aligned by hmmsearch:', pos_diff)
 
     # write the fasta files for each filter and category:
@@ -508,7 +508,7 @@ def score_hmm(hm, pos_reads, neg_reads, outdir):
         for val, fasta in neg_reads.items():
             o.write(fasta)
 
-    return data
+    return data, pos_diff
 
 
 def build_bar_plots(df, out):
@@ -619,7 +619,7 @@ def main():
     ###############################
 
     # BLASTx
-    bx_data = score_blastx(bx, pos_reads, neg_reads, outdir)
+    bx_data, bx_pos_fail = score_blastx(bx, pos_reads, neg_reads, outdir)
     bx_results = []
     for d in bx_data:
         r = score_results(d['TP'], d['FP'], d['TN'], d['FN'])
@@ -635,10 +635,14 @@ def main():
 
     # HMM
     # Count TP, FP, TN, FN
-    hm_data = score_hmm(hm, pos_reads, neg_reads, outdir)
+    hm_data, hm_pos_fail = score_hmm(hm, pos_reads, neg_reads, outdir)
     hm_results = []
+    # hmm models tend to have more unmapped reads than blastx algos
+    # we count the unmapped pos reads from hmm model as FN
+    # subtract unmapped bx reads from hm reads
+    pos_fail = hm_pos_fail - bx_pos_fail
     for d in hm_data:
-        r = score_results(d['TP'], d['FP'], d['TN'], d['FN'])
+        r = score_results(d['TP'], d['FP'], d['TN'], d['FN']+pos_fail)
         hm_results.append(r)
 
     ####
