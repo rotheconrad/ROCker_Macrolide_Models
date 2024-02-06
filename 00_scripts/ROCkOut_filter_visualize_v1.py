@@ -58,111 +58,41 @@ class TickRedrawer(matplotlib.artist.Artist):
         self.stale = False
 
 
-def parse_alignment(alignment):
+def parse_blast(passing, failing):
 
-    data = {}
-
-    with open(alignment, 'r') as file:
-        for line in file:
-            X = line.rstrip().split('\t')
-            read = X[0]
-            pid = float(X[2]) # percent sequence identity
-            alen = int(X[3]) # alignment length in amino acids
-            mm = int(X[4]) # number of mismatches
-            gp = int(X[5]) # number of gap openings
-            ev = float(X[10]) # e-value
-            bs = float(X[11]) # bitscore
-            qlen = int(X[12]) / 3 # full length of read divided by 3 amino acids
-
-            pmatch = alen / qlen # percent match length of read length
-            data[read] = [pid, alen, mm, gp, ev, bs, pmatch]
-
-    return data
-
-
-def parse_blast(passing, failing, alignment):
-
-    data = {
-        'Classifier': [], 'Midpoint': [], 'pID': [], 'Bitscore': [],
-        'Mismatches': [], 'Gaps': [], 'evalue': [], 'Alignment length': [],
-        'Percent alignment': [], 'alignment pid': [], 'alignment bitscore': []
-        }
+    data = {'Classifier': [], 'Midpoint': [], 'pID': [], 'Bitscore': []}
 
     # read passing alignments file into data dict
     with open(passing, 'r') as file:
         for line in file:
             X = line.rstrip().split('\t')
-            read = X[0]
             label = X[0].split(';')[-1]
             pid = float(X[2])
             bitscore = float(X[8])
-            sstart = min([int(X[6]), int(X[7])])
-            ssend = max([int(X[6]), int(X[7])])
-
-            # get additional data from alignment file
-            Y = alignment[read]
-            ypid = Y[0]
-            alen = Y[1]
-            mm = Y[2]
-            gp = Y[3]
-            ev = Y[4]
-            ybs = Y[5]
-            pmatch = Y[6]
-
-            #print(read, pid, ypid, bitscore, ybs)
-
-            midp = (sstart + ssend) / 2
+            sstart = int(X[6])
+            ssend = int(X[7])
+            midp = sstart + ssend / 2
             classifier = 'TP' if label == 'Positive' else 'FP'
-
             data['Classifier'].append(classifier)
             data['Midpoint'].append(midp)
             data['pID'].append(pid)
             data['Bitscore'].append(bitscore)
-            data['Mismatches'].append(mm)
-            data['Gaps'].append(gp)
-            data['evalue'].append(ev)
-            data['Alignment length'].append(alen)
-            data['Percent alignment'].append(pmatch)
-            data['alignment pid'].append(ypid)
-            data['alignment bitscore'].append(ybs)
 
     # read failing alignments file into data dict
     with open(failing, 'r') as file:
         for line in file:
-            read = X[0]
             X = line.rstrip().split('\t')
             label = X[0].split(';')[-1]
             pid = float(X[2])
             bitscore = float(X[8])
-            sstart = min([int(X[6]), int(X[7])])
-            ssend = max([int(X[6]), int(X[7])])
-
-            # get additional data from alignment file
-            Y = alignment[read]
-            ypid = Y[0]
-            alen = Y[1]
-            mm = Y[2]
-            gp = Y[3]
-            ev = Y[4]
-            ybs = Y[5]
-            pmatch = Y[6]
-
-            #print(read, pid, ypid, bitscore, ybs)
-
-            midp = (sstart + ssend) / 2
+            sstart = int(X[6])
+            ssend = int(X[7])
+            midp = sstart + ssend / 2
             classifier = 'FN' if label == 'Positive' else 'TN'
-
             data['Classifier'].append(classifier)
             data['Midpoint'].append(midp)
             data['pID'].append(pid)
             data['Bitscore'].append(bitscore)
-            data['Mismatches'].append(mm)
-            data['Gaps'].append(gp)
-            data['evalue'].append(ev)
-            data['Alignment length'].append(alen)
-            data['Percent alignment'].append(pmatch)
-            data['alignment pid'].append(ypid)
-            data['alignment bitscore'].append(ybs)
 
     df = pd.DataFrame(data)
 
@@ -175,100 +105,27 @@ def build_plot(df, outpre):
     C = {'TP': '#3182bd', 'FP': '#de2d26', 'TN': '#7fbc41', 'FN': '#c51b7d'}
     labs = df['Classifier'].tolist()
     xs = df['Midpoint'].tolist()
-    xlab = 'Gene position (amino acids)'
+    xlab = 'Gene position (base pairs)'
     cmap = [ C[i] for i in labs ]
 
-    # Sequence Identity - a
-    dfa = df[['Midpoint', 'pID', 'Classifier']]
-    dfa.columns = ['xs', 'ys', 'hue']
+    # Sequence Identity
     ptitle = f'Sequence Identity'
     ylab = 'Sequence identity (%)'
     ys = df['pID'].tolist()
     outfile = f'{outpre}_pid.pdf'
-    _ = scatter_plot(dfa, ptitle, xlab, ylab, xs, ys, C, cmap, outfile)
+    _ = scatter_plot(ptitle, xlab, ylab, xs, ys, C, cmap, outfile)
 
-    # Bitscore - b
-    dfb = df[['Midpoint', 'Bitscore', 'Classifier']]
-    dfb.columns = ['xs', 'ys', 'hue']
+    # Bitscore
     ys = df['Bitscore'].tolist()
     ptitle = f'Bitscore'
     ylab = 'Bitscore'
     outfile = f'{outpre}_bts.pdf'
-    _ = scatter_plot(dfb, ptitle, xlab, ylab, xs, ys, C, cmap, outfile)
-
-    # Mismatches - c
-    dfc = df[['Midpoint', 'Mismatches', 'Classifier']]
-    dfc.columns = ['xs', 'ys', 'hue']
-    ys = df['Mismatches'].tolist()
-    ptitle = f'Mismatches'
-    ylab = 'Mismatches'
-    outfile = f'{outpre}_Mismatches.pdf'
-    _ = scatter_plot(dfc, ptitle, xlab, ylab, xs, ys, C, cmap, outfile)
-
-    # Gaps - d
-    dfd = df[['Midpoint', 'Gaps', 'Classifier']]
-    dfd.columns = ['xs', 'ys', 'hue']
-    ys = df['Gaps'].tolist()
-    ptitle = f'Gaps'
-    ylab = 'Gaps'
-    outfile = f'{outpre}_Gaps.pdf'
-    _ = scatter_plot(dfd, ptitle, xlab, ylab, xs, ys, C, cmap, outfile)
-
-    # evalue - e
-    dfe = df[['Midpoint', 'evalue', 'Classifier']]
-    dfe.columns = ['xs', 'ys', 'hue']
-    ys = df['evalue'].tolist()
-    ptitle = f'evalue'
-    ylab = 'evalue'
-    outfile = f'{outpre}_evalue.pdf'
-    _ = scatter_plot(dfe, ptitle, xlab, ylab, xs, ys, C, cmap, outfile)
-
-    # Alignment length - f
-    dff = df[['Midpoint', 'Alignment length', 'Classifier']]
-    dff.columns = ['xs', 'ys', 'hue']
-    ys = df['Alignment length'].tolist()
-    ptitle = f'Alignment length'
-    ylab = 'Alignment length'
-    outfile = f'{outpre}_alen.pdf'
-    _ = scatter_plot(dff, ptitle, xlab, ylab, xs, ys, C, cmap, outfile)
-
-    # Percent alignment - g
-    dfg = df[['Midpoint', 'Percent alignment', 'Classifier']]
-    dfg.columns = ['xs', 'ys', 'hue']
-    ys = df['Percent alignment'].tolist()
-    ptitle = f'Alignment length / read length'
-    ylab = 'Alignment length (%)'
-    outfile = f'{outpre}_prcnt-alen.pdf'
-    _ = scatter_plot(dfg, ptitle, xlab, ylab, xs, ys, C, cmap, outfile)
-
-
-    # alignment vs filter pid - h
-    xs = df['alignment pid'].tolist()
-    xlab = 'Sequence identity (%) from alignment'
-    dfh = df[['alignment pid', 'pID', 'Classifier']]
-    dfh.columns = ['xs', 'ys', 'hue']
-    ptitle = f'Alignment vs. Filter: Sequence Identity'
-    ylab = 'Sequence identity (%) from filter'
-    ys = df['pID'].tolist()
-    outfile = f'{outpre}_alignment-vs-pid.pdf'
-    _ = scatter_plot(dfh, ptitle, xlab, ylab, xs, ys, C, cmap, outfile)
-
-    # alignment vs filter bitscore - i
-    xs = df['alignment bitscore'].tolist()
-    xlab = 'Bitscore from alignment'
-    dfi = df[['alignment bitscore', 'Bitscore', 'Classifier']]
-    dfi.columns = ['xs', 'ys', 'hue']
-    ptitle = f'Alignment vs. Filter: Bitscore'
-    ylab = 'Bitscore from filter'
-    ys = df['pID'].tolist()
-    outfile = f'{outpre}_alignment-vs-bitscore.pdf'
-    _ = scatter_plot(dfi, ptitle, xlab, ylab, xs, ys, C, cmap, outfile)
-
+    _ = scatter_plot(ptitle, xlab, ylab, xs, ys, C, cmap, outfile)
 
     return True
 
 
-def scatter_plot(df, ptitle, xlab, ylab, xs, ys, C, cmap, outfile):
+def scatter_plot(ptitle, xlab, ylab, xs, ys, C, cmap, outfile):
 
     # number of data points
     n = len(xs)
@@ -285,21 +142,17 @@ def scatter_plot(df, ptitle, xlab, ylab, xs, ys, C, cmap, outfile):
     g = sns.JointGrid(x=xs, y=ys, palette=cmap)
     # x margin kde plot
     sns.kdeplot(
-            data=df,
-            x='xs',
-            hue='hue',
-            palette=C,
+            x=xs,
             ax=g.ax_marg_x,
             legend=False,
+            color=color
             )
     # y margin kde plot
     sns.kdeplot(
-            data=df,
-            y='ys',
-            hue='hue',
-            palette=C,
+            y=ys,
             ax=g.ax_marg_y,
             legend=False,
+            color=color
             )
     # main scatter plot
     rast = True if n >= 1000000 else False
@@ -325,12 +178,7 @@ def scatter_plot(df, ptitle, xlab, ylab, xs, ys, C, cmap, outfile):
         ylab,
         fontsize=12, x=-0.02
         )
-    xmin, xmax = min(xs), max(xs)
-    xoffset = round((xmax - xmin) / 20)
-    g.ax_joint.set_xlim([xmin - xoffset, xmax + xoffset])
-    ymin, ymax = min(ys), max(ys)
-    yoffset = round((ymax - ymin) / 20)
-    g.ax_joint.set_ylim([ymin - yoffset, ymax + yoffset+yoffset])
+
     # set the axis parameters / style
     g.ax_joint.tick_params(
         axis='both', which='major', direction='inout', color='k',
@@ -401,13 +249,6 @@ def main():
         required=True
         )
     parser.add_argument(
-        '-a', '--alignment_file',
-        help='Please specify the original alignments file!',
-        metavar='',
-        type=str,
-        required=True
-        )
-    parser.add_argument(
         '-o', '--output_file',
         help='Please specify the output file (use .pdf)!',
         metavar='',
@@ -420,18 +261,17 @@ def main():
     # define input params
     passing = args['passing_file']
     failing = args['failing_file']
-    alignment = args['alignment_file']
     outpre = args['output_file']
 
     # Do what you came here to do:
     print('\n\nRunning Script...')
 
     # parse the alignment files
-    data = parse_alignment(alignment)
-    df = parse_blast(passing, failing, data)
+    df = parse_blast(passing, failing)
 
     _ = build_plot(df, outpre)
 
+    
     print('\n\nComplete success space cadet! Hold on to your boots.\n\n')
 
 if __name__ == "__main__":
