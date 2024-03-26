@@ -389,8 +389,6 @@ We make two similar similar selections for the *Testing set*:
 
 # Step 04: Build ROCker models
 
-*I don't have the final figures yet. Waiting on Kenji to finalize the ROCkOut code.*
-
 Several genomes in this model have more than one mcr/epta/sulfatase gene in the genome that share considerable sequence similarity and conserved sites in the multiple sequence alignment. These additional gene copies were found by the ROCkIn workflow, but they were discluded during the dereplication step. They show up in the model labeled as orange non_target genes but they fall at or above the blue ROCker filter threshold. ROCkOut provides the genome, genomic position each simulated read came from, and the target gene's UniProt ID associated with the genome the read came from. We used this information to look up the genome on NCBI, track down the coordinates to retrieve the gene (amino acid) fasta sequence, and used UniProt BLAST+ search to find the associated UniProt ID. We check the multiple sequence alignments and annotation information before adding the UniProt ID of the additional gene copy to the positive target input list. We did this iterative process of tracking down genes for both training and testing sets.
 
 This is an iterative process of building a model, investigating the results, and tracking down all the peculiarities to arrive at a final postive and/or negative UniProt ID set.
@@ -421,13 +419,11 @@ cd 02b_mcr1_test
 sbatch --export odir=model,pos=mcr1_test_pos.txt,neg=mcr1_test_neg.txt /ROCkOut/00b_sbatch/ROCkOut.sbatch
 ```
 
-**Results**
-
-That's it. The models are built. I'll include final figures here once I have them.
-
-ROCkOut as an "-extract" feature that collects the labeled, simulated, short reads into fasta files. We will use these fasta files from the *Testing set* to execute ROCkOut's align, filter, and place functions against the *Training set* models.
+![MCR ROCker Models](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/01_mcr/00_figures/04a-mcr-ROCker-model-250bp.png)
 
 # Step 05: Test ROCker models
+
+ROCkOut has an "-extract" feature that collects the labeled, simulated, short reads into fasta files. We will use these fasta files from the *Testing set* to execute ROCkOut's align, filter, and place functions against the *Training set* models.
 
 We build models for the *Testing set* because 1) this is a convenient way to use the ROCkOut figures and interactive plots to fine tune the sequence selection and 2) ROCkOut downloads genomes the genes are part of, simulates short sequence reads for the genomes, and labels the reads and positive, negative, target, or non_target. We can collect these reads into a mock metagenome that is labeled so we can track them and use them to score the results.
 
@@ -691,7 +687,21 @@ python 00_scripts/score_rocker_model.py -mm ../02b_mcr1_test/simulated_reads/sim
 - Positive read count from hmmsearch: 5089
 - Positive reads not aligned by hmmsearch: 571
 
-### d. Positive read count sanity check
+![MCR Test Set Scoring results](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/01_mcr/00_figures/04b-mcrMockMetaScores.png)
+
+### d. Build pie trees with pplacer and itol.
+
+ROCkOut already includes the pie tree output with its "place" function. This step is really just retrieve the right file and using the [iTol](https://itol.embl.de/) website.
+
+##### Read placement tree for mcr All model.
+
+![Read placement tree for mcr All model](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/01_mcr/00_figures/04c-mcrall-phylo-placement.png)
+
+##### Read placement tree for mcr 1 model.
+
+![Read placement tree for mcr 1 model](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/01_mcr/00_figures/04d-mcr1-phylo-placement.png)
+
+### e. Positive read count sanity check
 
 This section was performed during the development of ROCkOut but may still serve useful those with extra curiosity.
 
@@ -740,9 +750,7 @@ python 00_scripts/00c_scripts/investigate_pos_read_discrepancy.py -mm ../01b_mcr
 - Total reads not in rocker filter output: 741
 - Total reads not in hmm search results: 1910
 
-There are plots too. I'll put some examples. This section and plots have mainly been to double check ROCkOut and track down discrepencies ect. during development.
-
-### e. Verify TP FP TN FN labels and scoring analysis (additional visuals)
+### f. Verify TP FP TN FN labels and scoring analysis (additional visuals)
 
 The score_rocker_model.py script writes out a fasta directory with file names labeled for filter method and failed, passed, TP, FP, TN, or FN.
 
@@ -821,43 +829,15 @@ python 00_scripts/alignment_label_test.py -bn 01a_alignments/simread_250_raw_rea
 python 00_scripts/alignment_label_test.py -bn 01a_alignments/simread_300_raw_reads.blastn -bx 01a_alignments/simread_300_raw_reads.blastx -dx 01a_alignments/simread_300_raw_reads.dmndx -fd ../01a_mcrAll_train/test_score_300/fastas -od 02d_plots_300
 ```
 
-This creates a lot of figures. I'll put some of them here and I'll put the rest in their own directory of the GitHub repo. I've ran this a few times already during the development of ROCkOut but I'll wait to put the final ones here once Kenji has the code all sorted.
+##### mcr All model read mapping and classification for bitscore.
 
-### f. Build pie trees with pplacer and itol.
+![mcr All model read mapping and classification for bitscore](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/01_mcr/00_figures/04e_verify_bitscore.png)
 
-ROCkOut already includes a place function. This step is really just retrieve the right file and using the [iTol](https://itol.embl.de/) website.
+##### mcr All model read mapping and classification for percent sequence identity.
 
-I'll put the figure here once I have the final ROCkOut results after Kenji and I get the code sorted.
+![mcr All model read mapping and classification for percent sequence identity](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/01_mcr/00_figures/04f_verify_pid.png)
 
-### g. Make final phylogenetic tree figure
 
-1. We want to create a nice phylogenetic tree for the publication figure
-2. ROCkOut isn't able to retrieve complete data for all input UniProt IDs so we want to create the phylogenetic tree from only the sequences ROCkOut is able to use to build the model.
-3. We want to include our initial curated sequences in this tree.
-4. I'll use clustal omega for the alignment, ali view and trimal to clean it up, and IQTree to compute a maximum likelihood tree with bootstrap support. 
 
-```bash
-mkdir final_tree
 
-# copy the sequences from the mcrAll model
-cp model/shared_files/combined_genomes/combined_proteins_aa.fasta final_tree/
-
-# Clean seq names
-python 00_scripts/clean_seq_names.py -i final_tree/combined_proteins_aa.fasta
-
-# Create multiple alignment by first aligning the mcr SeedSeqs and then adding the combined proteins to the SeedSeq alignment.
-# using clustal omega version 1.2.4
-sbatch --export verified=mcr_SeedSeqs.faa,newseqs=combined_proteins_aa.fasta,output=final_tree_seqs.aln 00_scripts/seq_alignment.sbatch 
-
-# use Aliview to view and edit the multiple alignment.
-# Use Trimal to trim up the alignment.
-sbatch --export input=final_tree_seqs.aln,output=final_tree_seqs_trimmed.aln 00_scripts/seq_trim.sbatch
-
-# Build tree using IQ-Tree
-sbatch --export input=final_tree_seqs_trimmed.aln,outpre=final_tree 00_scripts//IQTree.sbatch
-```
-
-Upload the final_tree.treefile to iTol and customize as necessary.
-
-again I'll put the final figure here once Kenji and I get the ROCkOut code sorted and finalized.
 
