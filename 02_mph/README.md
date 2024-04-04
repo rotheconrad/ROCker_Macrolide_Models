@@ -408,11 +408,36 @@ We make two similar selections for the *Testing set*:
 
 # Step 04: Build ROCker models
 
-*I don't have the final figures yet. Waiting on Kenji to finalize the ROCkOut code.*
+The initial mphAll training and testing models had a few Non_target genes up in the positive target space. We checked them out and made the following decisions before rebuilding the model:
 
-This is a paragraph about any modification to the input UniProt ID lists when building the ROCker model
+##### For the training model:
 
-This is an iterative process of building a model, investigating the results, and tracking down all the peculiarities to arrive at a final postive and/or negative UniProt ID set.
+- CP009687.1 - Clostridium aceticum strain DSM 1496 - This genome has a gene "A0A0D8IAI0_9CLOT" annotated as Aminoglycoside phosphotransferase that is highly similar to other macrolide 2'- phosphotransferase and mphB genes. This gene was picked up by ROCkIn and added to the positive references for them mphAll model. This genome also has a second gene "A0A0D8I8G2_9CLOT" annotated as hypothetical protein on NCBI and as Aminoglycoside phosphotransferase domain-containing protein on UniProt. It is highly similar to other Mph(B) family macrolide 2'-phosphotransferase genes. We added this second gene to the positive reference sequences for the mphAll model. This genome also has a third gene "" annotated as
+
+- CP017269.1 - Geosporobacter ferrireducens strain IRF9 - this genome has two "macrolide 2'-phosphotransferase" genes adjacent to each other with 45.36% sequence identity. "A0A1D8GF31_9CLOT" is in the original positive set and we've added "A0A1D8GF44_9CLOT" to the positive set. The second gene also showed high sequence similarity with many other macrolide phosphotransferase and mphB annotated genes.
+
+- CP017603.1 - Clostridium formicaceticum strain ATCC 27076, complete genome - This genome has one Macrolide 2'-phosphotransferase gene picked up by ROCkIn and included in the positive reference set "A0A1D9FGX1_9CLOT" It also has a second degraded partial gene with internal stop codon. This partial gene has no match in the UniProt database and so this non_target reads can't be classified with ROCkOut. I removed this Uniprot ID from the positive reference list.
+
+- CP054705.1 - Salicibibacter cibarius strain NKC5-3 chromosome, complete genome - This genome has two copies of genes labelled as phosphotransferase that are 43.33% sequence identity with eachother but both share high sequence identity with other genes annotated as Macrolide 2'-phosphotransferase genes. The "A0A7T6Z3M7_9BACI" gene was picked up and included in the initial ROCkIn run. We added the second gene "A0A7T6Z7R1_9BACI" to the positive reference set.
+
+- KY399978.1 - Vibrio cholerae O139 strain ICDC-211 plasmid pVC211 - this plasmid has an "mphK" gene originally included in the positive set "A0A1Y0F4Y8_VIBCL" it also has an "mph2" gene that is 100% similar to genes in many other genomes and plasmids typically annotated as an "mphE." We added the new uniprot ID "A0A1Y0F4S0_VIBCL" to positive sequences. This plasmid also has an mphR gene that looks short but if it pops up in the model again check it out.
+
+- MH491967.2 - Proteus mirabilis strain HFK418 plasmid pHFK418-NDM - this plasmid appears to have two full copies and two short fragment copies of genes annotated as "Aldehyde dehydrogenase." The positive reference gene associated with this genome "A0A346FVF1_PROMI" is annotated as an Aldehyde dehydrogenase which is something we saw frequently blended in with mph clades in the ROCkIn results. Blast results on UniProt show these genes with high sequence similarity to mph genes and the MSA shows conserved sites. We added the second copy "A0A2I6SHX8_PROMI" to the positive references. This copy has many 100% identical matches with mphE and mph2 annotated genes in genomes of other species. this plasmid copy gets around. Possible misannotation as Aldehyde dehydrogenase. The A0A2I6SHX8_PROMI ID appears to be linked to a 100% identical gene in a different genome leaving no way to classify these reads with ROCkOut. I've removed these IDs from the positive reference set.
+
+##### For the testing model:
+
+- CP017269.1 - Geosporobacter ferrireducens strain IRF9 - this genome is listed above. Apparently one copy made it in the training set and one in the testing set. Both genes are retained in the training set and removed from the testing set.
+
+- CP054705.1 - Salicibibacter cibarius strain NKC5-3 - this genome is listed above. Apparently one copy made it in the training set and one in the testing set. Both genes are retained in the training set and removed from the testing set.
+
+- KF648874.1 - Exiguobacterium sp. S3-2 plasmid pMC1 - this plasmid has two genes annotated as macrolide 2-phosphotransferase that have 44.37% sequence identity. The "V9Z4V9_9BACL" gene was included initially from ROCkIn and the "V9ZAR1_9BACL" gene was added to the positive reference set in this refinement round.
+
+- MK450539.1 - Pseudomonas aeruginosa DIM-1 - this genome has two mph genes annotated as Mph(F) family macrolide 2'-phosphotransferase and Mph(E) or mph2 family macrolide 2'-phosphotransferase that have 37.63% sequence identity. The mphF "A0A5P4S8P6_PSEAI" gene was included initially from ROCkIn and the "A0A1I9WCL7_PSEAI" gene was added to the positive reference set in this refinement round. This additional gene shares 100% sequence identity with many genes in many species' genomes. The "A0A1I9WCL7_PSEAI" uniprot ID appears to link to these two plasmids KU984333.1, KF512014.1 and not the second copy in the MK450539.1 genome. I'm removing these two IDs from the set.
+
+*note: The second genes are typically picked up by ROCkIn in the initial blast search of the uniprot database but get dereplicated with mmseqs at 90% sequence similarity with other genes. When a genome has two genes but only one gene is selected as a cluster representative, the other gene ID is missed, but shows up in the simulated reads during model building. This is why we investigate them and add them back in when necessary.*
+
+Finally, we chose the FP+ setting with ROCkOut refine.
+parameter -c fp+
 
 ```bash
 # mphAll model
@@ -440,13 +465,11 @@ cd 02b_mphA_test
 sbatch --export odir=model,pos=mphA_test_pos.txt,neg=mphA_test_neg.txt /ROCkOut/00b_sbatch/ROCkOut.sbatch
 ```
 
-**Results**
-
-That's it. The models are built. I'll include final figures here once I have them.
-
-ROCkOut as an "-extract" feature that collects the labeled, simulated, short reads into fasta files. We will use these fasta files from the *Testing set* to execute ROCkOut's align, filter, and place functions against the *Training set* models.
+![MCR ROCker Models](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/02_mph/00_figures/04a-mph-ROCker-model-250bp.png)
 
 # Step 05: Test ROCker models
+
+ROCkOut as an "-extract" feature that collects the labeled, simulated, short reads into fasta files. We will use these fasta files from the *Testing set* to execute ROCkOut's align, filter, and place functions against the *Training set* models.
 
 We build models for the *Testing set* because 1) this is a convenient way to use the ROCkOut figures and interactive plots to fine tune the sequence selection and 2) ROCkOut downloads genomes the genes are part of, simulates short sequence reads for the genomes, and labels the reads and positive, negative, target, or non_target. We can collect these reads into a mock metagenome that is labeled so we can track them and use them to score the results.
 
@@ -564,44 +587,44 @@ python 00_scripts/besthit_filter_hmm.py -i test_score_300/mphA-final_hmmSearch_3
 **Results:**
 
 #### mphAll - 100 bp reads
-- Total number of entries in hmm file: 27806
+- Total number of entries in hmm file: 5914
 - Number of duplicate hmm matches: 0
-- Number of best hit entries written to new file: 27806
+- Number of best hit entries written to new file: 5914
 
 #### mphAll - 150 bp reads
-- Total number of entries in hmm file: 26264
-- Number of duplicate hmm matches: 2
-- Number of best hit entries written to new file: 26262 
+- Total number of entries in hmm file: 4620
+- Number of duplicate hmm matches: 0
+- Number of best hit entries written to new file: 4620 
 
 #### mphAll - 250 bp reads
-- Total number of entries in hmm file: 19582
-- Number of duplicate hmm matches: 11
-- Number of best hit entries written to new file: 19571 
+- Total number of entries in hmm file: 3395
+- Number of duplicate hmm matches: 0
+- Number of best hit entries written to new file: 3395 
 
 #### mphAll - 300 bp reads
-- Total number of entries in hmm file: 17942
-- Number of duplicate hmm matches: 13
-- Number of best hit entries written to new file: 17929
+- Total number of entries in hmm file: 2966
+- Number of duplicate hmm matches: 2
+- Number of best hit entries written to new file: 2964
 
 #### mphA - 100 bp reads
-- Total number of entries in hmm file: 16628
+- Total number of entries in hmm file: 16570
 - Number of duplicate hmm matches: 0
-- Number of best hit entries written to new file: 16628
+- Number of best hit entries written to new file: 16570
 
 #### mphA - 150 bp reads
-- Total number of entries in hmm file: 17457
-- Number of duplicate hmm matches: 2
-- Number of best hit entries written to new file: 17455
+- Total number of entries in hmm file: 13389
+- Number of duplicate hmm matches: 1
+- Number of best hit entries written to new file: 13388
 
 #### mphA - 250 bp reads
-- Total number of entries in hmm file: 13195
-- Number of duplicate hmm matches: 0
-- Number of best hit entries written to new file: 13195
+- Total number of entries in hmm file: 9440
+- Number of duplicate hmm matches: 1
+- Number of best hit entries written to new file: 9439
 
 #### mphA - 300 bp reads
-- Total number of entries in hmm file: 11702
-- Number of duplicate hmm matches: 4
-- Number of best hit entries written to new file: 11698 
+- Total number of entries in hmm file: 8647
+- Number of duplicate hmm matches: 3
+- Number of best hit entries written to new file: 8644 
 
 ### c. Compile, score, and plot results
 
@@ -639,127 +662,90 @@ python 00_scripts/score_rocker_model.py -mm ../02b_mphA_test/simulated_reads/sim
 **Results:**
 
 #### mphAll - 100 bp reads
-- Positive read count from metagenome: 42985
-- Positive read count from Diamond/BlastX alignment: 39714
-- Positive reads not aligned by BlastX: 3271
-- Positive read count from ROCkOut: 39714
-- Positive reads not reported by ROCkOut: 3271
-- Positive read count from hmmsearch: 26080
-- Positive reads not aligned by hmmsearch: 16905
+- Positive read count from metagenome: 6872
+- Positive read count from Diamond/BlastX alignment: 6674
+- Positive reads not aligned by BlastX: 198
+- Positive read count from ROCkOut: 6674
+- Positive reads not reported by ROCkOut: 198
+- Positive read count from hmmsearch: 5738
+- Positive reads not aligned by hmmsearch: 1134
 
 #### mphAll - 150 bp reads
-- Positive read count from metagenome: 29734
-- Positive read count from Diamond/BlastX alignment: 27851
-- Positive reads not aligned by BlastX: 1883
-- Positive read count from ROCkOut: 27851
-- Positive reads not reported by ROCkOut: 1883
-- Positive read count from hmmsearch: 23504
-- Positive reads not aligned by hmmsearch: 6230
+- Positive read count from metagenome: 4868
+- Positive read count from Diamond/BlastX alignment: 4735
+- Positive reads not aligned by BlastX: 133
+- Positive read count from ROCkOut: 4735
+- Positive reads not reported by ROCkOut: 133
+- Positive read count from hmmsearch: 4272
+- Positive reads not aligned by hmmsearch: 596
 
 #### mphAll - 250 bp reads
-- Positive read count from metagenome: 19185
-- Positive read count from Diamond/BlastX alignment: 18119
-- Positive reads not aligned by BlastX: 1066
-- Positive read count from ROCkOut: 18119
-- Positive reads not reported by ROCkOut: 1066
-- Positive read count from hmmsearch: 16551
-- Positive reads not aligned by hmmsearch: 2634
+- Positive read count from metagenome: 3311
+- Positive read count from Diamond/BlastX alignment: 3182
+- Positive reads not aligned by BlastX: 129
+- Positive read count from ROCkOut: 3182
+- Positive reads not reported by ROCkOut: 129
+- Positive read count from hmmsearch: 2892
+- Positive reads not aligned by hmmsearch: 419
 
 #### mphAll - 300 bp reads
-- Positive read count from metagenome: 16227
-- Positive read count from Diamond/BlastX alignment: 15486
-- Positive reads not aligned by BlastX: 741
-- Positive read count from ROCkOut: 15486
-- Positive reads not reported by ROCkOut: 741
-- Positive read count from hmmsearch: 14317
-- Positive reads not aligned by hmmsearch: 1910
+- Positive read count from metagenome: 2603
+- Positive read count from Diamond/BlastX alignment: 2516
+- Positive reads not aligned by BlastX: 87
+- Positive read count from ROCkOut: 2516
+- Positive reads not reported by ROCkOut: 87
+- Positive read count from hmmsearch: 2356
+- Positive reads not aligned by hmmsearch: 247
 
 #### mphA - 100 bp reads
-- Positive read count from metagenome: 15548
-- Positive read count from Diamond/BlastX alignment: 15396
-- Positive reads not aligned by BlastX: 152
-- Positive read count from ROCkOut: 15396
-- Positive reads not reported by ROCkOut: 152
-- Positive read count from hmmsearch: 8633
-- Positive reads not aligned by hmmsearch: 6915
+- Positive read count from metagenome: 1331
+- Positive read count from Diamond/BlastX alignment: 1331
+- Positive reads not aligned by BlastX: 0
+- Positive read count from ROCkOut: 1331
+- Positive reads not reported by ROCkOut: 0
+- Positive read count from hmmsearch: 981
+- Positive reads not aligned by hmmsearch: 350
 
 #### mphA - 150 bp reads
-- Positive read count from metagenome: 10724
-- Positive read count from Diamond/BlastX alignment: 10622
-- Positive reads not aligned by BlastX: 102
-- Positive read count from ROCkOut: 10622
-- Positive reads not reported by ROCkOut: 102
-- Positive read count from hmmsearch: 8751
-- Positive reads not aligned by hmmsearch: 1973
+- Positive read count from metagenome: 1019
+- Positive read count from Diamond/BlastX alignment: 1019
+- Positive reads not aligned by BlastX: 0
+- Positive read count from ROCkOut: 1019
+- Positive reads not reported by ROCkOut: 0
+- Positive read count from hmmsearch: 859
+- Positive reads not aligned by hmmsearch: 160
 
 #### mphA - 250 bp reads
-- Positive read count from metagenome: 6698
-- Positive read count from Diamond/BlastX alignment: 6599
-- Positive reads not aligned by BlastX: 99
-- Positive read count from ROCkOut: 6599
-- Positive reads not reported by ROCkOut: 99
-- Positive read count from hmmsearch: 5835
-- Positive reads not aligned by hmmsearch: 863
+- Positive read count from metagenome: 684
+- Positive read count from Diamond/BlastX alignment: 681
+- Positive reads not aligned by BlastX: 3
+- Positive read count from ROCkOut: 681
+- Positive reads not reported by ROCkOut: 3
+- Positive read count from hmmsearch: 586
+- Positive reads not aligned by hmmsearch: 98
 
 #### mphA - 300 bp reads
-- Positive read count from metagenome: 5660
-- Positive read count from Diamond/BlastX alignment: 5593
-- Positive reads not aligned by BlastX: 67
-- Positive read count from ROCkOut: 5593
-- Positive reads not reported by ROCkOut: 67
-- Positive read count from hmmsearch: 5089
-- Positive reads not aligned by hmmsearch: 571
+- Positive read count from metagenome: 560
+- Positive read count from Diamond/BlastX alignment: 558
+- Positive reads not aligned by BlastX: 2
+- Positive read count from ROCkOut: 558
+- Positive reads not reported by ROCkOut: 2
+- Positive read count from hmmsearch: 502
+- Positive reads not aligned by hmmsearch: 58
 
-### d. Positive read count sanity check
+![MCR Test Set Scoring results](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/02_mph/00_figures/04b-mphMockMetaScores.png)
 
-This section was performed during the development of ROCkOut but may still serve useful those with extra curiosity.
+### d. Build pie trees with pplacer and itol.
 
-blast, diamond, and hmm align fewer reads than rocker labels as positive during
-the read simulation step.
+ROCkOut already includes the pie tree output with its "place" function. This step is really just retrieve the right file and using the [iTol](https://itol.embl.de/) website.
 
-The purpose of this script is to investigate that.
+##### Read placement tree for mcr All model.
 
-It plots histograms for the simulated reads labeled as positive split between reads that align and read reads that do not align by blastx or hmm or don't pass the rocker filter.
+![Read placement tree for mcr All model](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/02_mph/00_figures/04c-mphall-phylo-placement.png)
 
-I just show results for the mphAll model here, but the results were and can be repeated with mphA or any other model.
+##### Read placement tree for mcr 1 model.
 
-```bash
-python 00_scripts/investigate_pos_read_discrepancy.py -mm ../01b_mphAll_test/simulated_reads/simread_100_raw_reads.fasta -bx test_score_100/alignments/simread_100_raw_reads.fasta_ROCkOut_alignments.txt -hm test_score_100/mphAll-final_hmmSearch_100_filtered.tsv -rp test_score_100/ROCkOut_passing_alignments/simread_100_raw_reads.ROCkOut_passing.txt -rf test_score_100/ROCkOut_failing_alignments/simread_100_raw_reads.ROCkOut_failing.txt -o test_score_100/pos_read_test_100
-
-python 00_scripts/investigate_pos_read_discrepancy.py -mm ../01b_mphAll_test/simulated_reads/simread_150_raw_reads.fasta -bx test_score_150/alignments/simread_150_raw_reads.fasta_ROCkOut_alignments.txt -hm test_score_150/mphAll-final_hmmSearch_150_filtered.tsv -rp test_score_150/ROCkOut_passing_alignments/simread_150_raw_reads.ROCkOut_passing.txt -rf test_score_150/ROCkOut_failing_alignments/simread_150_raw_reads.ROCkOut_failing.txt -o test_score_150/pos_read_test_150
-
-python 00_scripts/investigate_pos_read_discrepancy.py -mm ../01b_mphAll_test/simulated_reads/simread_250_raw_reads.fasta -bx test_score_250/alignments/simread_250_raw_reads.fasta_ROCkOut_alignments.txt -hm test_score_250/mphAll-final_hmmSearch_250_filtered.tsv -rp test_score_250/ROCkOut_passing_alignments/simread_250_raw_reads.ROCkOut_passing.txt -rf test_score_250/ROCkOut_failing_alignments/simread_250_raw_reads.ROCkOut_failing.txt -o test_score_250/pos_read_test_250
-
-python 00_scripts/00c_scripts/investigate_pos_read_discrepancy.py -mm ../01b_mphAll_test/simulated_reads/simread_300_raw_reads.fasta -bx test_score_300/alignments/simread_300_raw_reads.fasta_ROCkOut_alignments.txt -hm test_score_300/mphAll-final_hmmSearch_300_filtered.tsv -rp test_score_300/ROCkOut_passing_alignments/simread_300_raw_reads.ROCkOut_passing.txt -rf test_score_300/ROCkOut_failing_alignments/simread_300_raw_reads.ROCkOut_failing.txt -o test_score_300/pos_read_test_300
-```
-
-**Results:**
-
-#### mphAll - 100 bp reads
-- Total Positives reads created: 42985
-- Total reads not aligned: 3271
-- Total reads not in rocker filter output: 3271
-- Total reads not in hmm search results: 16905
-
-#### mphAll - 150 bp reads
-- Total Positives reads created: 29734
-- Total reads not aligned: 1883
-- Total reads not in rocker filter output: 1883
-- Total reads not in hmm search results: 6230
-
-#### mphAll - 250 bp reads
-- Total Positives reads created: 19185
-- Total reads not aligned: 1066
-- Total reads not in rocker filter output: 1066
-- Total reads not in hmm search results: 2634
-
-#### mphAll - 300 bp reads
-- Total Positives reads created: 16227
-- Total reads not aligned: 741
-- Total reads not in rocker filter output: 741
-- Total reads not in hmm search results: 1910
-
-There are plots too. I'll put some examples. This section and plots have mainly been to double check ROCkOut and track down discrepencies ect. during development.
+![Read placement tree for mcr 1 model](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/02_mph/00_figures/04d-mph-phylo-placement.png)
 
 ### e. Verify TP FP TN FN labels and scoring analysis (additional visuals)
 
@@ -774,109 +760,24 @@ The second step will be to create some figures to visualize the results.
 I just show results for the mphAll model here, but the results were and can be repeated with mphA or any other model.
 
 ```bash
-cd 01c_alignment_label_testing
-mkdir 00a_log 00b_alignment_dbs 01a_alignments
+> python ../../00c_scripts/ROCkOut_filter_visualize.py -p test_score_100/ROCkOut_passing_alignments/simread_100_raw_reads.ROCkOut_passing.txt -f test_score_100/ROCkOut_failing_alignments/simread_100_raw_reads.ROCkOut_failing.txt -o test_score_100/ROCkOut_Filter_Viz_100 -a test_score_100/alignments/simread_100_raw_reads.fasta_ROCkOut_alignments.txt
 
-# copy files:
-cat 01a_mphAll_train/model/positive/*/target_protein/*_nt.fasta > 00b_alignment_dbs/combined_proteins_nt.fasta
-cat 01a_mphAll_train/model/positive/*/target_protein/*_AA.fasta > 00b_alignment_dbs/combined_proteins_aa.fasta
+> python ../../00c_scripts/ROCkOut_filter_visualize.py -p test_score_150/ROCkOut_passing_alignments/simread_150_raw_reads.ROCkOut_passing.txt -f test_score_150/ROCkOut_failing_alignments/simread_150_raw_reads.ROCkOut_failing.txt -o test_score_150/ROCkOut_Filter_Viz_150 -a test_score_150/alignments/simread_150_raw_reads.fasta_ROCkOut_alignments.txt
 
-# create alignment databases
-# using blast-plus v2.10.1
-makeblastdb -dbtype prot -in 00b_alignment_dbs/combined_proteins_aa.fasta
-makeblastdb -dbtype nucl -in 00b_alignment_dbs/combined_proteins_nt.fasta
-# using diamond v2.0.15
-diamond makedb --in 00b_alignment_dbs/combined_proteins_aa.fasta -d 00b_alignment_dbs/combined_proteins_aa
+> python ../../00c_scripts/ROCkOut_filter_visualize.py -p test_score_250/ROCkOut_passing_alignments/simread_250_raw_reads.ROCkOut_passing.txt -f test_score_250/ROCkOut_failing_alignments/simread_250_raw_reads.ROCkOut_failing.txt -o test_score_250/ROCkOut_Filter_Viz_250 -a test_score_250/alignments/simread_250_raw_reads.fasta_ROCkOut_alignments.txt
 
-# Run blastn and blastx for each mock metagenome
-# use sbatch script. script should include best hit filter post alignments.
-
-# blastn 100
-sbatch -e 00a_log/mphAll_100_BLASTn.err -o 00a_log/mphAll_100_BLASTn.out --export ref=00b_alignment_dbs/combined_proteins_nt.fasta,qry=../01b_mphAll_test/simulated_reads/simread_100_raw_reads.fasta,odir=01a_alignments 00_scripts/blastn.sbatch
-
-# blastx 100
-sbatch -e 00a_log/mphAll_100_BLASTx.err -o 00a_log/mphAll_100_BLASTx.out --export ref=00b_alignment_dbs/combined_proteins_aa.fasta,qry=../01b_mphAll_test/simulated_reads/simread_100_raw_reads.fasta,odir=01a_alignments 00_scripts/blastx.sbatch 
-
-# diamondx 100
-sbatch -e 00a_log/mphAll_100_DIAMONDx.err -o 00a_log/mphAll_100_DIAMONDx.out --export ref=00b_alignment_dbs/combined_proteins_aa,qry=../01b_mphAll_test/simulated_reads/simread_100_raw_reads.fasta,odir=01a_alignments 00_scripts/diamondx.sbatch 
-
-# blastn 150
-sbatch -e 00a_log/mphAll_150_BLASTn.err -o 00a_log/mphAll_150_BLASTn.out --export ref=00b_alignment_dbs/combined_proteins_nt.fasta,qry=../01b_mphAll_test/simulated_reads/simread_150_raw_reads.fasta,odir=01a_alignments 00_scripts/blastn.sbatch
-
-# blastx 150
-sbatch -e 00a_log/mphAll_150_BLASTx.err -o 00a_log/mphAll_150_BLASTx.out --export ref=00b_alignment_dbs/combined_proteins_aa.fasta,qry=../01b_mphAll_test/simulated_reads/simread_150_raw_reads.fasta,odir=01a_alignments 00_scripts/blastx.sbatch 
-
-# diamondx 150
-sbatch -e 00a_log/mphAll_150_DIAMONDx.err -o 00a_log/mphAll_150_DIAMONDx.out --export ref=00b_alignment_dbs/combined_proteins_aa,qry=../01b_mphAll_test/simulated_reads/simread_150_raw_reads.fasta,odir=01a_alignments 00_scripts/diamondx.sbatch 
-
-# blastn 250
-sbatch -e 00a_log/mphAll_250_BLASTn.err -o 00a_log/mphAll_250_BLASTn.out --export ref=00b_alignment_dbs/combined_proteins_nt.fasta,qry=../01b_mphAll_test/simulated_reads/simread_250_raw_reads.fasta,odir=01a_alignments 00_scripts/blastn.sbatch
-
-# blastx 250
-sbatch -e 00a_log/mphAll_250_BLASTx.err -o 00a_log/mphAll_250_BLASTx.out --export ref=00b_alignment_dbs/combined_proteins_aa.fasta,qry=../01b_mphAll_test/simulated_reads/simread_250_raw_reads.fasta,odir=01a_alignments 00_scripts/blastx.sbatch 
-
-# diamondx 250
-sbatch -e 00a_log/mphAll_250_DIAMONDx.err -o 00a_log/mphAll_250_DIAMONDx.out --export ref=00b_alignment_dbs/combined_proteins_aa,qry=../01b_mphAll_test/simulated_reads/simread_250_raw_reads.fasta,odir=01a_alignments 00_scripts/diamondx.sbatch 
-
-# blastn 300
-sbatch -e 00a_log/mphAll_300_BLASTn.err -o 00a_log/mphAll_300_BLASTn.out --export ref=00b_alignment_dbs/combined_proteins_nt.fasta,qry=../01b_mphAll_test/simulated_reads/simread_300_raw_reads.fasta,odir=01a_alignments 00_scripts/blastn.sbatch
-
-# blastx 300
-sbatch -e 00a_log/mphAll_300_BLASTx.err -o 00a_log/mphAll_300_BLASTx.out --export ref=00b_alignment_dbs/combined_proteins_aa.fasta,qry=../01b_mphAll_test/simulated_reads/simread_300_raw_reads.fasta,odir=01a_alignments 00_scripts/blastx.sbatch 
-
-# diamondx 300
-sbatch -e 00a_log/mphAll_300_DIAMONDx.err -o 00a_log/mphAll_300_DIAMONDx.out --export ref=00b_alignment_dbs/combined_proteins_aa,qry=../01b_mphAll_test/simulated_reads/simread_300_raw_reads.fasta,odir=01a_alignments 00_scripts/diamondx.sbatch 
-
-# visualize results:
-
-# wrote python script to read blastn and blastx results and to use the fasta files to label the passing, failing, TP, FP, TN, FN reads for each.
-
-python 00_scripts/alignment_label_test.py -bn 01a_alignments/simread_100_raw_reads.blastn -bx 01a_alignments/simread_100_raw_reads.blastx -dx 01a_alignments/simread_100_raw_reads.dmndx -fd ../01a_mphAll_train/test_score_100/fastas -od 02a_plots_100
-
-python 00_scripts/alignment_label_test.py -bn 01a_alignments/simread_150_raw_reads.blastn -bx 01a_alignments/simread_150_raw_reads.blastx -dx 01a_alignments/simread_150_raw_reads.dmndx -fd ../01a_mphAll_train/test_score_150/fastas -od 02b_plots_150
-
-python 00_scripts/alignment_label_test.py -bn 01a_alignments/simread_250_raw_reads.blastn -bx 01a_alignments/simread_250_raw_reads.blastx -dx 01a_alignments/simread_250_raw_reads.dmndx -fd ../01a_mphAll_train/test_score_250/fastas -od 02c_plots_250
-
-python 00_scripts/alignment_label_test.py -bn 01a_alignments/simread_300_raw_reads.blastn -bx 01a_alignments/simread_300_raw_reads.blastx -dx 01a_alignments/simread_300_raw_reads.dmndx -fd ../01a_mphAll_train/test_score_300/fastas -od 02d_plots_300
+> python ../../00c_scripts/ROCkOut_filter_visualize.py -p test_score_300/ROCkOut_passing_alignments/simread_300_raw_reads.ROCkOut_passing.txt -f test_score_300/ROCkOut_failing_alignments/simread_300_raw_reads.ROCkOut_failing.txt -o test_score_300/ROCkOut_Filter_Viz_300 -a test_score_300/alignments/simread_300_raw_reads.fasta_ROCkOut_alignments.txt
 ```
 
-This creates a lot of figures. I'll put some of them here and I'll put the rest in their own directory of the GitHub repo. I've ran this a few times already during the development of ROCkOut but I'll wait to put the final ones here once Kenji has the code all sorted.
+##### mcr All model read mapping and classification for bitscore.
 
-### f. Build pie trees with pplacer and itol.
+![mcr All model read mapping and classification for bitscore](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/02_mph/00_figures/04e_verify_bitscore.png)
 
-ROCkOut already includes a place function. This step is really just retrieve the right file and using the [iTol](https://itol.embl.de/) website.
+##### mcr All model read mapping and classification for percent sequence identity.
 
-I'll put the figure here once I have the final ROCkOut results after Kenji and I get the code sorted.
+![mcr All model read mapping and classification for percent sequence identity](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/02_mph/00_figures/04f_verify_pid.png)
 
-### g. Make final phylogenetic tree figure
 
-1. We want to create a nice phylogenetic tree for the publication figure
-2. ROCkOut isn't able to retrieve complete data for all input UniProt IDs so we want to create the phylogenetic tree from only the sequences ROCkOut is able to use to build the model.
-3. We want to include our initial curated sequences in this tree.
-4. I'll use clustal omega for the alignment, ali view and trimal to clean it up, and IQTree to compute a maximum likelihood tree with bootstrap support. 
 
-```bash
-mkdir final_tree
 
-# copy the sequences from the mphAll model
-cp model/shared_files/combined_genomes/combined_proteins_aa.fasta final_tree/
-
-# Clean seq names
-python 00_scripts/clean_seq_names.py -i final_tree/combined_proteins_aa.fasta
-
-# Create multiple alignment by first aligning the mph SeedSeqs and then adding the combined proteins to the SeedSeq alignment.
-# using clustal omega version 1.2.4
-sbatch --export verified=mph_SeedSeqs.faa,newseqs=combined_proteins_aa.fasta,output=final_tree_seqs.aln 00_scripts/seq_alignment.sbatch 
-
-# use Aliview to view and edit the multiple alignment.
-# Use Trimal to trim up the alignment.
-sbatch --export input=final_tree_seqs.aln,output=final_tree_seqs_trimmed.aln 00_scripts/seq_trim.sbatch
-
-# Build tree using IQ-Tree
-sbatch --export input=final_tree_seqs_trimmed.aln,outpre=final_tree 00_scripts//IQTree.sbatch
-```
-
-Upload the final_tree.treefile to iTol and customize as necessary.
-
-again I'll put the final figure here once Kenji and I get the ROCkOut code sorted and finalized.
 

@@ -778,7 +778,21 @@ python 00_scripts/score_rocker_model.py -mm ../02b_lnuF_test/simulated_reads/sim
 - Positive read count from hmmsearch: 5089
 - Positive reads not aligned by hmmsearch: 571
 
-### d. Positive read count sanity check
+![MCR Test Set Scoring results](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/01_mcr/00_figures/04b-mcrMockMetaScores.png)
+
+### d. Build pie trees with pplacer and itol.
+
+ROCkOut already includes the pie tree output with its "place" function. This step is really just retrieve the right file and using the [iTol](https://itol.embl.de/) website.
+
+##### Read placement tree for mcr All model.
+
+![Read placement tree for mcr All model](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/01_mcr/00_figures/04c-mcrall-phylo-placement.png)
+
+##### Read placement tree for mcr 1 model.
+
+![Read placement tree for mcr 1 model](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/01_mcr/00_figures/04d-mcr1-phylo-placement.png)
+
+### e. Positive read count sanity check
 
 This section was performed during the development of ROCkOut but may still serve useful those with extra curiosity.
 
@@ -829,7 +843,7 @@ python 00_scripts/00c_scripts/investigate_pos_read_discrepancy.py -mm ../01b_lnu
 
 There are plots too. I'll put some examples. This section and plots have mainly been to double check ROCkOut and track down discrepencies ect. during development.
 
-### e. Verify TP FP TN FN labels and scoring analysis (additional visuals)
+### f. Verify TP FP TN FN labels and scoring analysis (additional visuals)
 
 The score_rocker_model.py script writes out a fasta directory with file names labeled for filter method and failed, passed, TP, FP, TN, or FN.
 
@@ -842,109 +856,26 @@ The second step will be to create some figures to visualize the results.
 I just show results for the lnuAll model here, but the results were and can be repeated with lnuF or any other model.
 
 ```bash
-cd 01c_alignment_label_testing
-mkdir 00a_log 00b_alignment_dbs 01a_alignments
+> python ../../00c_scripts/ROCkOut_filter_visualize.py -p test_score_100/ROCkOut_passing_alignments/simread_100_raw_reads.ROCkOut_passing.txt -f test_score_100/ROCkOut_failing_alignments/simread_100_raw_reads.ROCkOut_failing.txt -o test_score_100/ROCkOut_Filter_Viz_100 -a test_score_100/alignments/simread_100_raw_reads.fasta_ROCkOut_alignments.txt
 
-# copy files:
-cat 01a_lnuAll_train/model/positive/*/target_protein/*_nt.fasta > 00b_alignment_dbs/combined_proteins_nt.fasta
-cat 01a_lnuAll_train/model/positive/*/target_protein/*_AA.fasta > 00b_alignment_dbs/combined_proteins_aa.fasta
+> python ../../00c_scripts/ROCkOut_filter_visualize.py -p test_score_150/ROCkOut_passing_alignments/simread_150_raw_reads.ROCkOut_passing.txt -f test_score_150/ROCkOut_failing_alignments/simread_150_raw_reads.ROCkOut_failing.txt -o test_score_150/ROCkOut_Filter_Viz_150 -a test_score_150/alignments/simread_150_raw_reads.fasta_ROCkOut_alignments.txt
 
-# create alignment databases
-# using blast-plus v2.10.1
-makeblastdb -dbtype prot -in 00b_alignment_dbs/combined_proteins_aa.fasta
-makeblastdb -dbtype nucl -in 00b_alignment_dbs/combined_proteins_nt.fasta
-# using diamond v2.0.15
-diamond makedb --in 00b_alignment_dbs/combined_proteins_aa.fasta -d 00b_alignment_dbs/combined_proteins_aa
+> python ../../00c_scripts/ROCkOut_filter_visualize.py -p test_score_250/ROCkOut_passing_alignments/simread_250_raw_reads.ROCkOut_passing.txt -f test_score_250/ROCkOut_failing_alignments/simread_250_raw_reads.ROCkOut_failing.txt -o test_score_250/ROCkOut_Filter_Viz_250 -a test_score_250/alignments/simread_250_raw_reads.fasta_ROCkOut_alignments.txt
 
-# Run blastn and blastx for each mock metagenome
-# use sbatch script. script should include best hit filter post alignments.
-
-# blastn 100
-sbatch -e 00a_log/lnuAll_100_BLASTn.err -o 00a_log/lnuAll_100_BLASTn.out --export ref=00b_alignment_dbs/combined_proteins_nt.fasta,qry=../01b_lnuAll_test/simulated_reads/simread_100_raw_reads.fasta,odir=01a_alignments 00_scripts/blastn.sbatch
-
-# blastx 100
-sbatch -e 00a_log/lnuAll_100_BLASTx.err -o 00a_log/lnuAll_100_BLASTx.out --export ref=00b_alignment_dbs/combined_proteins_aa.fasta,qry=../01b_lnuAll_test/simulated_reads/simread_100_raw_reads.fasta,odir=01a_alignments 00_scripts/blastx.sbatch 
-
-# diamondx 100
-sbatch -e 00a_log/lnuAll_100_DIAMONDx.err -o 00a_log/lnuAll_100_DIAMONDx.out --export ref=00b_alignment_dbs/combined_proteins_aa,qry=../01b_lnuAll_test/simulated_reads/simread_100_raw_reads.fasta,odir=01a_alignments 00_scripts/diamondx.sbatch 
-
-# blastn 150
-sbatch -e 00a_log/lnuAll_150_BLASTn.err -o 00a_log/lnuAll_150_BLASTn.out --export ref=00b_alignment_dbs/combined_proteins_nt.fasta,qry=../01b_lnuAll_test/simulated_reads/simread_150_raw_reads.fasta,odir=01a_alignments 00_scripts/blastn.sbatch
-
-# blastx 150
-sbatch -e 00a_log/lnuAll_150_BLASTx.err -o 00a_log/lnuAll_150_BLASTx.out --export ref=00b_alignment_dbs/combined_proteins_aa.fasta,qry=../01b_lnuAll_test/simulated_reads/simread_150_raw_reads.fasta,odir=01a_alignments 00_scripts/blastx.sbatch 
-
-# diamondx 150
-sbatch -e 00a_log/lnuAll_150_DIAMONDx.err -o 00a_log/lnuAll_150_DIAMONDx.out --export ref=00b_alignment_dbs/combined_proteins_aa,qry=../01b_lnuAll_test/simulated_reads/simread_150_raw_reads.fasta,odir=01a_alignments 00_scripts/diamondx.sbatch 
-
-# blastn 250
-sbatch -e 00a_log/lnuAll_250_BLASTn.err -o 00a_log/lnuAll_250_BLASTn.out --export ref=00b_alignment_dbs/combined_proteins_nt.fasta,qry=../01b_lnuAll_test/simulated_reads/simread_250_raw_reads.fasta,odir=01a_alignments 00_scripts/blastn.sbatch
-
-# blastx 250
-sbatch -e 00a_log/lnuAll_250_BLASTx.err -o 00a_log/lnuAll_250_BLASTx.out --export ref=00b_alignment_dbs/combined_proteins_aa.fasta,qry=../01b_lnuAll_test/simulated_reads/simread_250_raw_reads.fasta,odir=01a_alignments 00_scripts/blastx.sbatch 
-
-# diamondx 250
-sbatch -e 00a_log/lnuAll_250_DIAMONDx.err -o 00a_log/lnuAll_250_DIAMONDx.out --export ref=00b_alignment_dbs/combined_proteins_aa,qry=../01b_lnuAll_test/simulated_reads/simread_250_raw_reads.fasta,odir=01a_alignments 00_scripts/diamondx.sbatch 
-
-# blastn 300
-sbatch -e 00a_log/lnuAll_300_BLASTn.err -o 00a_log/lnuAll_300_BLASTn.out --export ref=00b_alignment_dbs/combined_proteins_nt.fasta,qry=../01b_lnuAll_test/simulated_reads/simread_300_raw_reads.fasta,odir=01a_alignments 00_scripts/blastn.sbatch
-
-# blastx 300
-sbatch -e 00a_log/lnuAll_300_BLASTx.err -o 00a_log/lnuAll_300_BLASTx.out --export ref=00b_alignment_dbs/combined_proteins_aa.fasta,qry=../01b_lnuAll_test/simulated_reads/simread_300_raw_reads.fasta,odir=01a_alignments 00_scripts/blastx.sbatch 
-
-# diamondx 300
-sbatch -e 00a_log/lnuAll_300_DIAMONDx.err -o 00a_log/lnuAll_300_DIAMONDx.out --export ref=00b_alignment_dbs/combined_proteins_aa,qry=../01b_lnuAll_test/simulated_reads/simread_300_raw_reads.fasta,odir=01a_alignments 00_scripts/diamondx.sbatch 
-
-# visualize results:
-
-# wrote python script to read blastn and blastx results and to use the fasta files to label the passing, failing, TP, FP, TN, FN reads for each.
-
-python 00_scripts/alignment_label_test.py -bn 01a_alignments/simread_100_raw_reads.blastn -bx 01a_alignments/simread_100_raw_reads.blastx -dx 01a_alignments/simread_100_raw_reads.dmndx -fd ../01a_lnuAll_train/test_score_100/fastas -od 02a_plots_100
-
-python 00_scripts/alignment_label_test.py -bn 01a_alignments/simread_150_raw_reads.blastn -bx 01a_alignments/simread_150_raw_reads.blastx -dx 01a_alignments/simread_150_raw_reads.dmndx -fd ../01a_lnuAll_train/test_score_150/fastas -od 02b_plots_150
-
-python 00_scripts/alignment_label_test.py -bn 01a_alignments/simread_250_raw_reads.blastn -bx 01a_alignments/simread_250_raw_reads.blastx -dx 01a_alignments/simread_250_raw_reads.dmndx -fd ../01a_lnuAll_train/test_score_250/fastas -od 02c_plots_250
-
-python 00_scripts/alignment_label_test.py -bn 01a_alignments/simread_300_raw_reads.blastn -bx 01a_alignments/simread_300_raw_reads.blastx -dx 01a_alignments/simread_300_raw_reads.dmndx -fd ../01a_lnuAll_train/test_score_300/fastas -od 02d_plots_300
+> python ../../00c_scripts/ROCkOut_filter_visualize.py -p test_score_300/ROCkOut_passing_alignments/simread_300_raw_reads.ROCkOut_passing.txt -f test_score_300/ROCkOut_failing_alignments/simread_300_raw_reads.ROCkOut_failing.txt -o test_score_300/ROCkOut_Filter_Viz_300 -a test_score_300/alignments/simread_300_raw_reads.fasta_ROCkOut_alignments.txt
 ```
 
-This creates a lot of figures. I'll put some of them here and I'll put the rest in their own directory of the GitHub repo. I've ran this a few times already during the development of ROCkOut but I'll wait to put the final ones here once Kenji has the code all sorted.
+##### mcr All model read mapping and classification for bitscore.
 
-### f. Build pie trees with pplacer and itol.
+![mcr All model read mapping and classification for bitscore](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/01_mcr/00_figures/04e_verify_bitscore.png)
 
-ROCkOut already includes a place function. This step is really just retrieve the right file and using the [iTol](https://itol.embl.de/) website.
+##### mcr All model read mapping and classification for percent sequence identity.
 
-I'll put the figure here once I have the final ROCkOut results after Kenji and I get the code sorted.
+![mcr All model read mapping and classification for percent sequence identity](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/01_mcr/00_figures/04f_verify_pid.png)
 
-### g. Make final phylogenetic tree figure
 
-1. We want to create a nice phylogenetic tree for the publication figure
-2. ROCkOut isn't able to retrieve complete data for all input UniProt IDs so we want to create the phylogenetic tree from only the sequences ROCkOut is able to use to build the model.
-3. We want to include our initial curated sequences in this tree.
-4. I'll use clustal omega for the alignment, ali view and trimal to clean it up, and IQTree to compute a maximum likelihood tree with bootstrap support. 
 
-```bash
-mkdir final_tree
 
-# copy the sequences from the lnuAll model
-cp model/shared_files/combined_genomes/combined_proteins_aa.fasta final_tree/
 
-# Clean seq names
-python 00_scripts/clean_seq_names.py -i final_tree/combined_proteins_aa.fasta
 
-# Create multiple alignment by first aligning the lnu SeedSeqs and then adding the combined proteins to the SeedSeq alignment.
-# using clustal omega version 1.2.4
-sbatch --export verified=lnu_SeedSeqs.faa,newseqs=combined_proteins_aa.fasta,output=final_tree_seqs.aln 00_scripts/seq_alignment.sbatch 
-
-# use Aliview to view and edit the multiple alignment.
-# Use Trimal to trim up the alignment.
-sbatch --export input=final_tree_seqs.aln,output=final_tree_seqs_trimmed.aln 00_scripts/seq_trim.sbatch
-
-# Build tree using IQ-Tree
-sbatch --export input=final_tree_seqs_trimmed.aln,outpre=final_tree 00_scripts//IQTree.sbatch
-```
-
-Upload the final_tree.treefile to iTol and customize as necessary.
-
-again I'll put the final figure here once Kenji and I get the ROCkOut code sorted and finalized.
 

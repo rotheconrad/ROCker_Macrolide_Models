@@ -393,6 +393,31 @@ Several genomes in this model have more than one mcr/epta/sulfatase gene in the 
 
 This is an iterative process of building a model, investigating the results, and tracking down all the peculiarities to arrive at a final postive and/or negative UniProt ID set.
 
+##### During model testing with mock metagenome we found some borderline genes leading to high false negative rate in the model. We moved the following uniprot IDs from the testing set to the training set. They are associated with 5 genomes.
+
+A0A0P7C4N1_PSEPU
+A0A6S5TUK3_PSEPU
+A0A2S2CBM0_9GAMM
+A0A2Z4PQG0_9GAMM
+A0A2Z4PX90_9GAMM
+A0A1Z2SKS1_VIBGA
+A0A1Z2SLK4_VIBGA
+A0A2S0PCW0_9NEIS
+
+##### from 01a_mcrAll_train directory
+mv ../01b_mcrAll_test/model/positive/A0A0P7C4N1_PSEPU/ model/positive/
+mv ../01b_mcrAll_test/model/positive/A0A6S5TUK3_PSEPU/ model/positive/
+mv ../01b_mcrAll_test/model/positive/A0A2S2CBM0_9GAMM/ model/positive/
+mv ../01b_mcrAll_test/model/positive/A0A2Z4PQG0_9GAMM/ model/positive/
+mv ../01b_mcrAll_test/model/positive/A0A2Z4PX90_9GAMM/ model/positive/
+mv ../01b_mcrAll_test/model/positive/A0A1Z2SKS1_VIBGA/ model/positive/
+mv ../01b_mcrAll_test/model/positive/A0A1Z2SLK4_VIBGA/ model/positive/
+mv ../01b_mcrAll_test/model/positive/A0A2S0PCW0_9NEIS/ model/positive/
+
+
+Finally, we chose the FP+ setting with ROCkOut refine.
+parameter -c fp+
+
 ```bash
 # mcrAll model
 mkdir 01a_mcrAll_train 01b_mcrAll_test 01c_alignment_label_testing
@@ -763,70 +788,13 @@ The second step will be to create some figures to visualize the results.
 I just show results for the mcrAll model here, but the results were and can be repeated with mcr1 or any other model.
 
 ```bash
-cd 01c_alignment_label_testing
-mkdir 00a_log 00b_alignment_dbs 01a_alignments
+> python ../../00c_scripts/ROCkOut_filter_visualize.py -p test_score_100/ROCkOut_passing_alignments/simread_100_raw_reads.ROCkOut_passing.txt -f test_score_100/ROCkOut_failing_alignments/simread_100_raw_reads.ROCkOut_failing.txt -o test_score_100/ROCkOut_Filter_Viz_100 -a test_score_100/alignments/simread_100_raw_reads.fasta_ROCkOut_alignments.txt
 
-# copy files:
-cat 01a_mcrAll_train/model/positive/*/target_protein/*_nt.fasta > 00b_alignment_dbs/combined_proteins_nt.fasta
-cat 01a_mcrAll_train/model/positive/*/target_protein/*_AA.fasta > 00b_alignment_dbs/combined_proteins_aa.fasta
+> python ../../00c_scripts/ROCkOut_filter_visualize.py -p test_score_150/ROCkOut_passing_alignments/simread_150_raw_reads.ROCkOut_passing.txt -f test_score_150/ROCkOut_failing_alignments/simread_150_raw_reads.ROCkOut_failing.txt -o test_score_150/ROCkOut_Filter_Viz_150 -a test_score_150/alignments/simread_150_raw_reads.fasta_ROCkOut_alignments.txt
 
-# create alignment databases
-# using blast-plus v2.10.1
-makeblastdb -dbtype prot -in 00b_alignment_dbs/combined_proteins_aa.fasta
-makeblastdb -dbtype nucl -in 00b_alignment_dbs/combined_proteins_nt.fasta
-# using diamond v2.0.15
-diamond makedb --in 00b_alignment_dbs/combined_proteins_aa.fasta -d 00b_alignment_dbs/combined_proteins_aa
+> python ../../00c_scripts/ROCkOut_filter_visualize.py -p test_score_250/ROCkOut_passing_alignments/simread_250_raw_reads.ROCkOut_passing.txt -f test_score_250/ROCkOut_failing_alignments/simread_250_raw_reads.ROCkOut_failing.txt -o test_score_250/ROCkOut_Filter_Viz_250 -a test_score_250/alignments/simread_250_raw_reads.fasta_ROCkOut_alignments.txt
 
-# Run blastn and blastx for each mock metagenome
-# use sbatch script. script should include best hit filter post alignments.
-
-# blastn 100
-sbatch -e 00a_log/mcrAll_100_BLASTn.err -o 00a_log/mcrAll_100_BLASTn.out --export ref=00b_alignment_dbs/combined_proteins_nt.fasta,qry=../01b_mcrAll_test/simulated_reads/simread_100_raw_reads.fasta,odir=01a_alignments 00_scripts/blastn.sbatch
-
-# blastx 100
-sbatch -e 00a_log/mcrAll_100_BLASTx.err -o 00a_log/mcrAll_100_BLASTx.out --export ref=00b_alignment_dbs/combined_proteins_aa.fasta,qry=../01b_mcrAll_test/simulated_reads/simread_100_raw_reads.fasta,odir=01a_alignments 00_scripts/blastx.sbatch 
-
-# diamondx 100
-sbatch -e 00a_log/mcrAll_100_DIAMONDx.err -o 00a_log/mcrAll_100_DIAMONDx.out --export ref=00b_alignment_dbs/combined_proteins_aa,qry=../01b_mcrAll_test/simulated_reads/simread_100_raw_reads.fasta,odir=01a_alignments 00_scripts/diamondx.sbatch 
-
-# blastn 150
-sbatch -e 00a_log/mcrAll_150_BLASTn.err -o 00a_log/mcrAll_150_BLASTn.out --export ref=00b_alignment_dbs/combined_proteins_nt.fasta,qry=../01b_mcrAll_test/simulated_reads/simread_150_raw_reads.fasta,odir=01a_alignments 00_scripts/blastn.sbatch
-
-# blastx 150
-sbatch -e 00a_log/mcrAll_150_BLASTx.err -o 00a_log/mcrAll_150_BLASTx.out --export ref=00b_alignment_dbs/combined_proteins_aa.fasta,qry=../01b_mcrAll_test/simulated_reads/simread_150_raw_reads.fasta,odir=01a_alignments 00_scripts/blastx.sbatch 
-
-# diamondx 150
-sbatch -e 00a_log/mcrAll_150_DIAMONDx.err -o 00a_log/mcrAll_150_DIAMONDx.out --export ref=00b_alignment_dbs/combined_proteins_aa,qry=../01b_mcrAll_test/simulated_reads/simread_150_raw_reads.fasta,odir=01a_alignments 00_scripts/diamondx.sbatch 
-
-# blastn 250
-sbatch -e 00a_log/mcrAll_250_BLASTn.err -o 00a_log/mcrAll_250_BLASTn.out --export ref=00b_alignment_dbs/combined_proteins_nt.fasta,qry=../01b_mcrAll_test/simulated_reads/simread_250_raw_reads.fasta,odir=01a_alignments 00_scripts/blastn.sbatch
-
-# blastx 250
-sbatch -e 00a_log/mcrAll_250_BLASTx.err -o 00a_log/mcrAll_250_BLASTx.out --export ref=00b_alignment_dbs/combined_proteins_aa.fasta,qry=../01b_mcrAll_test/simulated_reads/simread_250_raw_reads.fasta,odir=01a_alignments 00_scripts/blastx.sbatch 
-
-# diamondx 250
-sbatch -e 00a_log/mcrAll_250_DIAMONDx.err -o 00a_log/mcrAll_250_DIAMONDx.out --export ref=00b_alignment_dbs/combined_proteins_aa,qry=../01b_mcrAll_test/simulated_reads/simread_250_raw_reads.fasta,odir=01a_alignments 00_scripts/diamondx.sbatch 
-
-# blastn 300
-sbatch -e 00a_log/mcrAll_300_BLASTn.err -o 00a_log/mcrAll_300_BLASTn.out --export ref=00b_alignment_dbs/combined_proteins_nt.fasta,qry=../01b_mcrAll_test/simulated_reads/simread_300_raw_reads.fasta,odir=01a_alignments 00_scripts/blastn.sbatch
-
-# blastx 300
-sbatch -e 00a_log/mcrAll_300_BLASTx.err -o 00a_log/mcrAll_300_BLASTx.out --export ref=00b_alignment_dbs/combined_proteins_aa.fasta,qry=../01b_mcrAll_test/simulated_reads/simread_300_raw_reads.fasta,odir=01a_alignments 00_scripts/blastx.sbatch 
-
-# diamondx 300
-sbatch -e 00a_log/mcrAll_300_DIAMONDx.err -o 00a_log/mcrAll_300_DIAMONDx.out --export ref=00b_alignment_dbs/combined_proteins_aa,qry=../01b_mcrAll_test/simulated_reads/simread_300_raw_reads.fasta,odir=01a_alignments 00_scripts/diamondx.sbatch 
-
-# visualize results:
-
-# wrote python script to read blastn and blastx results and to use the fasta files to label the passing, failing, TP, FP, TN, FN reads for each.
-
-python 00_scripts/alignment_label_test.py -bn 01a_alignments/simread_100_raw_reads.blastn -bx 01a_alignments/simread_100_raw_reads.blastx -dx 01a_alignments/simread_100_raw_reads.dmndx -fd ../01a_mcrAll_train/test_score_100/fastas -od 02a_plots_100
-
-python 00_scripts/alignment_label_test.py -bn 01a_alignments/simread_150_raw_reads.blastn -bx 01a_alignments/simread_150_raw_reads.blastx -dx 01a_alignments/simread_150_raw_reads.dmndx -fd ../01a_mcrAll_train/test_score_150/fastas -od 02b_plots_150
-
-python 00_scripts/alignment_label_test.py -bn 01a_alignments/simread_250_raw_reads.blastn -bx 01a_alignments/simread_250_raw_reads.blastx -dx 01a_alignments/simread_250_raw_reads.dmndx -fd ../01a_mcrAll_train/test_score_250/fastas -od 02c_plots_250
-
-python 00_scripts/alignment_label_test.py -bn 01a_alignments/simread_300_raw_reads.blastn -bx 01a_alignments/simread_300_raw_reads.blastx -dx 01a_alignments/simread_300_raw_reads.dmndx -fd ../01a_mcrAll_train/test_score_300/fastas -od 02d_plots_300
+> python ../../00c_scripts/ROCkOut_filter_visualize.py -p test_score_300/ROCkOut_passing_alignments/simread_300_raw_reads.ROCkOut_passing.txt -f test_score_300/ROCkOut_failing_alignments/simread_300_raw_reads.ROCkOut_failing.txt -o test_score_300/ROCkOut_Filter_Viz_300 -a test_score_300/alignments/simread_300_raw_reads.fasta_ROCkOut_alignments.txt
 ```
 
 ##### mcr All model read mapping and classification for bitscore.
