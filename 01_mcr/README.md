@@ -448,7 +448,7 @@ sbatch --export odir=model,pos=mcr1_test_pos.txt,neg=mcr1_test_neg.txt /ROCkOut/
 
 ![mcr ROCker Models](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/01_mcr/00_figures/04a-mcr-ROCker-model-250bp.png)
 
-Top panel (A) is the ROCker model for the training set. This is the primary model used. Bottom panel (B) is the ROCker model for the testing set. The testing set is used to build a simulated short read data set to challenge the training set emulating real word metagenome data.
+Top panel (A) is the ROCker model for the mcr all gene set. Bottom panel (B) is the ROCker model for the mcr1 gene set.
 
 # Step 05: Test ROCker models
 

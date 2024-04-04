@@ -8,6 +8,7 @@ Previously named as linF linA etc.
 Resistance to the lincosamide antibiotic by ATP-dependent modification of the 3' and/or 4'-hydroxyl groups of the methylthiolincosamide sugar.
 
 Lincosamides (e.g. lincomycin, clindamycin) are a class of drugs which bind to the 23s portion of the 50S subunit of bacterial ribosomes. This interaction inhibits early elongation of peptide chains by inhibiting the transpeptidase reaction, acting similarly to macrolides.
+
 # Table of Contents
 
 1. [Step 00: Curate starting sequences](#step-00-curate-starting-sequences)
@@ -464,23 +465,44 @@ Review the Data Table and the Phylogenetic tree to make positive and negative Un
 
 **Results**
 
-We decided to build two models:
+We decided to build three models:
 
 1. A model capturing all lnu genes (F, B, G, H) used in the *Training set* tree as positive references to make a model that captures all of these lnu genes. This model also uses a negative references from the polymerase clades x-x in the default chart. This model is useful for broad surveillance of lnu F, B, G, H gene functions in microbial communities. We refer to this model as lnuAll.
 1. A model focusing specifically on the lnuF gene clade of the *Training set* using only the sequences from this clade as positive references and using all other sequences as negative references. We refer to this model as lnuF.
+1. A model focusing specifically on the lnuB/G gene clade of the *Training set* using only the sequences from this clade as positive references and using all other sequences as negative references. We refer to this model as lnuB/G.
 
-We make two similar similar selections for the *Testing set*:
+We make three similar similar selections for the *Testing set*:
 
 1. We mirrored the gene selections from the lnuAll model with the *Testing set* to use as positive and negative references. The genomes containing these genes will be used to create a mock metagenome to challenge the lnuAll ROCker model.
 1. We select genes in the *Testing set* specifically from the lnuF gene clade. The genomes containing these genes will be used to create a mock metagenome to challenge the lnuF ROCker model.
+1. We select genes in the *Testing set* specifically from the lnuB/G gene clade. The genomes containing these genes will be used to create a mock metagenome to challenge the lnuF ROCker model.
 
 # Step 04: Build ROCker models
 
-*I don't have the final figures yet. Waiting on Kenji to finalize the ROCkOut code.*
-
-This is a paragraph about any modification to the input UniProt ID lists when building the ROCker model
-
 This is an iterative process of building a model, investigating the results, and tracking down all the peculiarities to arrive at a final postive and/or negative UniProt ID set.
+
+The lnu genes share some sequence similarity with dna polymerase sub unit beta.
+ROCkIn picks up a large clade of these genes that apppear distinct from the
+lnu genes. Using ROCkIn, we decided to use this clade as negative references for the lnu all model.
+
+##### notes on building the lnuAll model:
+
+In the training set model there was one non_target gene that generated reads (orange dots in model figure) right at the bitscore cutoff line.
+
+- CP047640.1 - Proteus sp. ZN5 plasmid pZN5-103kb - this plasmid has two lnu genes annotated as one lnuF and one lnuG that have 34.85% sequence identity. The lnuF gene "A0A6G6TM98_9GAMM" was included in the positive reference set intitially from ROCkIn and the the lnuG "A0A6G6TMC0_9GAMM" has been added to the positive reference set in this refinement round. Both the lnuG and lnuF genes have 100% or very high sequence identity to genes in genomes of many other species. These genes or this plasmid gets around.
+
+In the testing set model there was one non_target gene that generated reads (orange dots in model figure) in sort of a double v pattern crossing the bitscore threshold.
+
+- MW940622.1 - Escherichia sp. strain SH9W plasmid pSH9W-tetX4 - this plasmid seems to contain a degraded psuedo-gene that is split into two fragments by gene prediction. The "A0A8E6P1C7_9ESCH" gene is the first half of an lnuF gene and was intitially picked up by ROCkIn and included in the positive reference set. The "A0A8E6UEX3_9ESCH" gene is the second half of the fragmented lnuF gene. Both gene fragments share 100% sequence identity with numerous genes from genomes of several other species. We added the second gene fragment UniProt ID to the positive reference set in this refinement round, but there is still a third fragment that maps to the end of the gene without a UniProt ID so I removed these IDs.
+
+##### notes on building the lnuF model:
+
+For this model we use only the lnuF clade as positive references and all other
+clades as negative references.
+
+The testing set for the lnuF model had the same gene fragment issue as the lnuAll testing model with the lnuF gene on the plasmid:
+
+- MW940622.1 - Escherichia sp. strain SH9W plasmid pSH9W-tetX4 - this plasmid seems to contain a degraded psuedo-gene that is split into two fragments by gene prediction. The "A0A8E6P1C7_9ESCH" gene is the first half of an lnuF gene and was intitially picked up by ROCkIn and included in the positive reference set. The "A0A8E6UEX3_9ESCH" gene is the second half of the fragmented lnuF gene. Both gene fragments share 100% sequence identity with numerous genes from genomes of several other species. We added the second gene fragment UniProt ID to the positive reference set in this refinement round.
 
 ```bash
 # lnuAll model
@@ -497,6 +519,7 @@ sbatch --export odir=model,pos=lnuAll_test_positive.txt,pos=lnuAll_test_negative
 ######
 
 # lnuF model
+
 mkdir 02a_lnuF_train 02b_lnuF_test 02c_alignment_label_testing
 
 # training set
@@ -506,15 +529,32 @@ sbatch --export odir=model,pos=lnuF_train_pos.txt,neg=lnuF_train_neg.txt /ROCkOu
 # testing set
 cd 02b_lnuF_test
 sbatch --export odir=model,pos=lnuF_test_pos.txt,neg=lnuF_test_neg.txt /ROCkOut/00b_sbatch/ROCkOut.sbatch
+
+######
+
+# lnuB/G model
+
+mkdir 04a_lnuBG_train 04_lnuBG_test
+
+# upload lnuBG_train_pos.txt and lnuBG_train_neg.txt to 04a_lnuBG_train
+# upload lnuBG_test_pos.txt and lnuBG_test_neg.txt to 04_lnuBG_test
+
+## training set
+cd 04a_lnuBG_train
+sbatch --export odir=model,pos=lnuBG_train_pos.txt,neg=lnuBG_train_neg.txt ../../00b_sbatch/ROCkOut.sbatch
+
+## testing set
+cd 04b_lnuBG_test
+sbatch --export odir=model,pos=lnuBG_test_pos.txt,neg=lnuBG_test_neg.txt ../../00b_sbatch/ROCkOut.sbatch
 ```
 
-**Results**
+![mph ROCker Models](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/04_lnu/00_figures/04a-lnu-ROCker-model-250bp.png)
 
-That's it. The models are built. I'll include final figures here once I have them.
-
-ROCkOut as an "-extract" feature that collects the labeled, simulated, short reads into fasta files. We will use these fasta files from the *Testing set* to execute ROCkOut's align, filter, and place functions against the *Training set* models.
+Top panel (A) is the ROCker model for the lnu all gene set. Middle panel (B) is the ROCker model for the lnuF gene set. Bottom panel (C) is the ROCker model for the lnuB/G gene set.
 
 # Step 05: Test ROCker models
+
+ROCkOut as an "-extract" feature that collects the labeled, simulated, short reads into fasta files. We will use these fasta files from the *Testing set* to execute ROCkOut's align, filter, and place functions against the *Training set* models.
 
 We build models for the *Testing set* because 1) this is a convenient way to use the ROCkOut figures and interactive plots to fine tune the sequence selection and 2) ROCkOut downloads genomes the genes are part of, simulates short sequence reads for the genomes, and labels the reads and positive, negative, target, or non_target. We can collect these reads into a mock metagenome that is labeled so we can track them and use them to score the results.
 
@@ -550,6 +590,20 @@ sbatch --export infile=../02b_lnuF_test/simulated_reads/simread_150_raw_reads.fa
 sbatch --export infile=../02b_lnuF_test/simulated_reads/simread_250_raw_reads.fasta,model=model,outpre=test_score_250 ../../00b_sbatch/ROCkOut_score.sbatch
 
 sbatch --export infile=../02b_lnuF_test/simulated_reads/simread_300_raw_reads.fasta,model=model,outpre=test_score_300 ../../00b_sbatch/ROCkOut_score.sbatch
+
+######
+
+# lnuB/G model
+
+cd 04a_lnuBG_train
+
+sbatch --export infile=../04b_lnuBG_test/simulated_reads/simread_100_raw_reads.fasta,model=model,outpre=test_score_100 ../../00b_sbatch/ROCkOut_score.sbatch
+
+sbatch --export infile=../04b_lnuBG_test/simulated_reads/simread_150_raw_reads.fasta,model=model,outpre=test_score_150 ../../00b_sbatch/ROCkOut_score.sbatch
+
+sbatch --export infile=../04b_lnuBG_test/simulated_reads/simread_250_raw_reads.fasta,model=model,outpre=test_score_250 ../../00b_sbatch/ROCkOut_score.sbatch
+
+sbatch --export infile=../04b_lnuBG_test/simulated_reads/simread_300_raw_reads.fasta,model=model,outpre=test_score_300 ../../00b_sbatch/ROCkOut_score.sbatch
 ```
 
 ### b. Create and search custom HMM model
@@ -627,49 +681,104 @@ python 00_scripts/besthit_filter_hmm.py -i test_score_150/lnuF-final_hmmSearch_1
 python 00_scripts/besthit_filter_hmm.py -i test_score_250/lnuF-final_hmmSearch_250.tsv -o test_score_250/lnuF-final_hmmSearch_250_filtered.tsv
 
 python 00_scripts/besthit_filter_hmm.py -i test_score_300/lnuF-final_hmmSearch_300.tsv -o test_score_300/lnuF-final_hmmSearch_300_filtered.tsv
+
+######
+
+# lnuB/G model
+
+# build model (hmmbuild)
+hmmbuild lnuBG_model-final.hmm model/shared_files/multiple_alignment/complete_multiple_alignment_aa.fasta
+
+# convert mock metagenome nucleotides to 6 aa frames
+python ../../00c_scripts/nuc_fasta_6aa_frame_fasta.py -i ../04b_lnuBG_test/simulated_reads/simread_100_raw_reads.fasta -o test_score_100/simread_100_raw_reads_6frames.faa
+
+python ../../00c_scripts/nuc_fasta_6aa_frame_fasta.py -i ../04b_lnuBG_test/simulated_reads/simread_150_raw_reads.fasta -o test_score_150/simread_150_raw_reads_6frames.faa
+
+python ../../00c_scripts/nuc_fasta_6aa_frame_fasta.py -i ../04b_lnuBG_test/simulated_reads/simread_250_raw_reads.fasta -o test_score_250/simread_250_raw_reads_6frames.faa
+
+python ../../00c_scripts/nuc_fasta_6aa_frame_fasta.py -i ../04b_lnuBG_test/simulated_reads/simread_300_raw_reads.fasta -o test_score_300/simread_300_raw_reads_6frames.faa
+
+
+# Map Reads (hmmsearch)
+sbatch --export model=lnuBG_model-final.hmm,infile=test_score_100/simread_100_raw_reads_6frames.faa,outfile=test_score_100/lnuBG-final_hmmSearch_100.tsv ../../00b_sbatch/hmmsearch.sbatch
+
+sbatch --export model=lnuBG_model-final.hmm,infile=test_score_150/simread_150_raw_reads_6frames.faa,outfile=test_score_150/lnuBG-final_hmmSearch_150.tsv ../../00b_sbatch/hmmsearch.sbatch
+
+sbatch --export model=lnuBG_model-final.hmm,infile=test_score_250/simread_250_raw_reads_6frames.faa,outfile=test_score_250/lnuBG-final_hmmSearch_250.tsv ../../00b_sbatch/hmmsearch.sbatch
+
+sbatch --export model=lnuBG_model-final.hmm,infile=test_score_300/simread_300_raw_reads_6frames.faa,outfile=test_score_300/lnuBG-final_hmmSearch_300.tsv ../../00b_sbatch/hmmsearch.sbatch
+
+# Filter for best hit and score
+python ../../00c_scripts/besthit_filter_hmm.py -i test_score_100/lnuBG-final_hmmSearch_100.tsv -o test_score_100/lnuBG-final_hmmSearch_100_filtered.tsv
+
+python ../../00c_scripts/besthit_filter_hmm.py -i test_score_150/lnuBG-final_hmmSearch_150.tsv -o test_score_150/lnuBG-final_hmmSearch_150_filtered.tsv
+
+python ../../00c_scripts/besthit_filter_hmm.py -i test_score_250/lnuBG-final_hmmSearch_250.tsv -o test_score_250/lnuBG-final_hmmSearch_250_filtered.tsv
+
+python ../../00c_scripts/besthit_filter_hmm.py -i test_score_300/lnuBG-final_hmmSearch_300.tsv -o test_score_300/lnuBG-final_hmmSearch_300_filtered.tsv
 ```
 
 **Results:**
 
 #### lnuAll - 100 bp reads
-- Total number of entries in hmm file: 27806
+- Total number of entries in hmm file: 3077
 - Number of duplicate hmm matches: 0
-- Number of best hit entries written to new file: 27806
+- Number of best hit entries written to new file: 3077
 
 #### lnuAll - 150 bp reads
-- Total number of entries in hmm file: 26264
-- Number of duplicate hmm matches: 2
-- Number of best hit entries written to new file: 26262 
+- Total number of entries in hmm file: 2348
+- Number of duplicate hmm matches: 1
+- Number of best hit entries written to new file: 2347 
 
 #### lnuAll - 250 bp reads
-- Total number of entries in hmm file: 19582
-- Number of duplicate hmm matches: 11
-- Number of best hit entries written to new file: 19571 
+- Total number of entries in hmm file: 1532
+- Number of duplicate hmm matches: 0
+- Number of best hit entries written to new file: 1532 
 
 #### lnuAll - 300 bp reads
-- Total number of entries in hmm file: 17942
-- Number of duplicate hmm matches: 13
-- Number of best hit entries written to new file: 17929
+- Total number of entries in hmm file: 1340
+- Number of duplicate hmm matches: 0
+- Number of best hit entries written to new file: 1340
 
 #### lnuF - 100 bp reads
-- Total number of entries in hmm file: 16628
+- Total number of entries in hmm file: 5551
 - Number of duplicate hmm matches: 0
-- Number of best hit entries written to new file: 16628
+- Number of best hit entries written to new file: 5551
 
 #### lnuF - 150 bp reads
-- Total number of entries in hmm file: 17457
-- Number of duplicate hmm matches: 2
-- Number of best hit entries written to new file: 17455
+- Total number of entries in hmm file: 4429
+- Number of duplicate hmm matches: 1
+- Number of best hit entries written to new file: 4428
 
 #### lnuF - 250 bp reads
-- Total number of entries in hmm file: 13195
+- Total number of entries in hmm file: 2944
 - Number of duplicate hmm matches: 0
-- Number of best hit entries written to new file: 13195
+- Number of best hit entries written to new file: 2944
 
 #### lnuF - 300 bp reads
-- Total number of entries in hmm file: 11702
-- Number of duplicate hmm matches: 4
-- Number of best hit entries written to new file: 11698 
+- Total number of entries in hmm file: 2519
+- Number of duplicate hmm matches: 1
+- Number of best hit entries written to new file: 2519 
+
+#### lnuB/G - 100 bp reads
+- Total number of entries in hmm file: 2668
+- Number of duplicate hmm matches: 0
+- Number of best hit entries written to new file: 2668
+
+#### lnuB/G - 150 bp reads
+- Total number of entries in hmm file: 2070
+- Number of duplicate hmm matches: 1
+- Number of best hit entries written to new file: 2069
+
+#### lnuB/G - 250 bp reads
+- Total number of entries in hmm file: 1336
+- Number of duplicate hmm matches: 0
+- Number of best hit entries written to new file: 1336
+
+#### lnuB/G - 300 bp reads
+- Total number of entries in hmm file: 1173
+- Number of duplicate hmm matches: 0
+- Number of best hit entries written to new file: 1173 
 
 ### c. Compile, score, and plot results
 
@@ -702,146 +811,147 @@ python 00_scripts/score_rocker_model.py -mm ../02b_lnuF_test/simulated_reads/sim
 python 00_scripts/score_rocker_model.py -mm ../02b_lnuF_test/simulated_reads/simread_250_raw_reads.fasta -bx test_score_250/alignments/simread_250_raw_reads.fasta_ROCkOut_alignments.txt -hm test_score_250/lnuF-final_hmmSearch_250_filtered.tsv -rp test_score_250/ROCkOut_passing_alignments/simread_250_raw_reads.ROCkOut_passing.txt -rf test_score_250/ROCkOut_failing_alignments/simread_250_raw_reads.ROCkOut_failing.txt -o test_score_250/test_scores_250
 
 python 00_scripts/score_rocker_model.py -mm ../02b_lnuF_test/simulated_reads/simread_300_raw_reads.fasta -bx test_score_300/alignments/simread_300_raw_reads.fasta_ROCkOut_alignments.txt -hm test_score_300/lnuF-final_hmmSearch_300_filtered.tsv -rp test_score_300/ROCkOut_passing_alignments/simread_300_raw_reads.ROCkOut_passing.txt -rf test_score_300/ROCkOut_failing_alignments/simread_300_raw_reads.ROCkOut_failing.txt -o test_score_300/test_scores_300
+
+# lnuB/G model
+
+python ../../00c_scripts/score_rocker_model.py -mm ../04b_lnuBG_test/simulated_reads/simread_100_raw_reads.fasta -bx test_score_100/alignments/simread_100_raw_reads.fasta_ROCkOut_alignments.txt -hm test_score_100/lnuBG-final_hmmSearch_100_filtered.tsv -rp test_score_100/ROCkOut_passing_alignments/simread_100_raw_reads.ROCkOut_passing.txt -rf test_score_100/ROCkOut_failing_alignments/simread_100_raw_reads.ROCkOut_failing.txt -o test_score_100/test_scores_100
+
+python ../../00c_scripts/score_rocker_model.py -mm ../04b_lnuBG_test/simulated_reads/simread_150_raw_reads.fasta -bx test_score_150/alignments/simread_150_raw_reads.fasta_ROCkOut_alignments.txt -hm test_score_150/lnuBG-final_hmmSearch_150_filtered.tsv -rp test_score_150/ROCkOut_passing_alignments/simread_150_raw_reads.ROCkOut_passing.txt -rf test_score_150/ROCkOut_failing_alignments/simread_150_raw_reads.ROCkOut_failing.txt -o test_score_150/test_scores_150
+
+python ../../00c_scripts/score_rocker_model.py -mm ../04b_lnuBG_test/simulated_reads/simread_250_raw_reads.fasta -bx test_score_250/alignments/simread_250_raw_reads.fasta_ROCkOut_alignments.txt -hm test_score_250/lnuBG-final_hmmSearch_250_filtered.tsv -rp test_score_250/ROCkOut_passing_alignments/simread_250_raw_reads.ROCkOut_passing.txt -rf test_score_250/ROCkOut_failing_alignments/simread_250_raw_reads.ROCkOut_failing.txt -o test_score_250/test_scores_250
+
+python ../../00c_scripts/score_rocker_model.py -mm ../04b_lnuBG_test/simulated_reads/simread_300_raw_reads.fasta -bx test_score_300/alignments/simread_300_raw_reads.fasta_ROCkOut_alignments.txt -hm test_score_300/lnuBG-final_hmmSearch_300_filtered.tsv -rp test_score_300/ROCkOut_passing_alignments/simread_300_raw_reads.ROCkOut_passing.txt -rf test_score_300/ROCkOut_failing_alignments/simread_300_raw_reads.ROCkOut_failing.txt -o test_score_300/test_scores_300
 ```
 
 **Results:**
 
 #### lnuAll - 100 bp reads
-- Positive read count from metagenome: 42985
-- Positive read count from Diamond/BlastX alignment: 39714
-- Positive reads not aligned by BlastX: 3271
-- Positive read count from ROCkOut: 39714
-- Positive reads not reported by ROCkOut: 3271
-- Positive read count from hmmsearch: 26080
-- Positive reads not aligned by hmmsearch: 16905
+- Positive read count from metagenome: 2462
+- Positive read count from Diamond/BlastX alignment: 2432
+- Positive reads not aligned by BlastX: 30
+- Positive read count from ROCkOut: 2432
+- Positive reads not reported by ROCkOut: 30
+- Positive read count from hmmsearch: 2057
+- Positive reads not aligned by hmmsearch: 405
 
 #### lnuAll - 150 bp reads
-- Positive read count from metagenome: 29734
-- Positive read count from Diamond/BlastX alignment: 27851
-- Positive reads not aligned by BlastX: 1883
-- Positive read count from ROCkOut: 27851
-- Positive reads not reported by ROCkOut: 1883
-- Positive read count from hmmsearch: 23504
-- Positive reads not aligned by hmmsearch: 6230
+- Positive read count from metagenome: 1760
+- Positive read count from Diamond/BlastX alignment: 1717
+- Positive reads not aligned by BlastX: 43
+- Positive read count from ROCkOut: 1717
+- Positive reads not reported by ROCkOut: 43
+- Positive read count from hmmsearch: 1552
+- Positive reads not aligned by hmmsearch: 208
 
 #### lnuAll - 250 bp reads
-- Positive read count from metagenome: 19185
-- Positive read count from Diamond/BlastX alignment: 18119
-- Positive reads not aligned by BlastX: 1066
-- Positive read count from ROCkOut: 18119
-- Positive reads not reported by ROCkOut: 1066
-- Positive read count from hmmsearch: 16551
-- Positive reads not aligned by hmmsearch: 2634
+- Positive read count from metagenome: 1201
+- Positive read count from Diamond/BlastX alignment: 1141
+- Positive reads not aligned by BlastX: 60
+- Positive read count from ROCkOut: 1141
+- Positive reads not reported by ROCkOut: 60
+- Positive read count from hmmsearch: 1027
+- Positive reads not aligned by hmmsearch: 174
 
 #### lnuAll - 300 bp reads
-- Positive read count from metagenome: 16227
-- Positive read count from Diamond/BlastX alignment: 15486
-- Positive reads not aligned by BlastX: 741
-- Positive read count from ROCkOut: 15486
-- Positive reads not reported by ROCkOut: 741
-- Positive read count from hmmsearch: 14317
-- Positive reads not aligned by hmmsearch: 1910
+- Positive read count from metagenome: 965
+- Positive read count from Diamond/BlastX alignment: 926
+- Positive reads not aligned by BlastX: 39
+- Positive read count from ROCkOut: 926
+- Positive reads not reported by ROCkOut: 39
+- Positive read count from hmmsearch: 873
+- Positive reads not aligned by hmmsearch: 92
 
 #### lnuF - 100 bp reads
-- Positive read count from metagenome: 15548
-- Positive read count from Diamond/BlastX alignment: 15396
-- Positive reads not aligned by BlastX: 152
-- Positive read count from ROCkOut: 15396
-- Positive reads not reported by ROCkOut: 152
-- Positive read count from hmmsearch: 8633
-- Positive reads not aligned by hmmsearch: 6915
+- Positive read count from metagenome: 4126
+- Positive read count from Diamond/BlastX alignment: 4060
+- Positive reads not aligned by BlastX: 66
+- Positive read count from ROCkOut: 4060
+- Positive reads not reported by ROCkOut: 66
+- Positive read count from hmmsearch: 3232
+- Positive reads not aligned by hmmsearch: 894
 
 #### lnuF - 150 bp reads
-- Positive read count from metagenome: 10724
-- Positive read count from Diamond/BlastX alignment: 10622
-- Positive reads not aligned by BlastX: 102
-- Positive read count from ROCkOut: 10622
-- Positive reads not reported by ROCkOut: 102
-- Positive read count from hmmsearch: 8751
-- Positive reads not aligned by hmmsearch: 1973
+- Positive read count from metagenome: 2998
+- Positive read count from Diamond/BlastX alignment: 2943
+- Positive reads not aligned by BlastX: 55
+- Positive read count from ROCkOut: 2943
+- Positive reads not reported by ROCkOut: 55
+- Positive read count from hmmsearch: 2611
+- Positive reads not aligned by hmmsearch: 387
 
 #### lnuF - 250 bp reads
-- Positive read count from metagenome: 6698
-- Positive read count from Diamond/BlastX alignment: 6599
-- Positive reads not aligned by BlastX: 99
-- Positive read count from ROCkOut: 6599
-- Positive reads not reported by ROCkOut: 99
-- Positive read count from hmmsearch: 5835
-- Positive reads not aligned by hmmsearch: 863
+- Positive read count from metagenome: 2004
+- Positive read count from Diamond/BlastX alignment: 1972
+- Positive reads not aligned by BlastX: 32
+- Positive read count from ROCkOut: 1972
+- Positive reads not reported by ROCkOut: 32
+- Positive read count from hmmsearch: 1775
+- Positive reads not aligned by hmmsearch: 229
 
 #### lnuF - 300 bp reads
-- Positive read count from metagenome: 5660
-- Positive read count from Diamond/BlastX alignment: 5593
-- Positive reads not aligned by BlastX: 67
-- Positive read count from ROCkOut: 5593
-- Positive reads not reported by ROCkOut: 67
-- Positive read count from hmmsearch: 5089
-- Positive reads not aligned by hmmsearch: 571
+- Positive read count from metagenome: 1627
+- Positive read count from Diamond/BlastX alignment: 1604
+- Positive reads not aligned by BlastX: 23
+- Positive read count from ROCkOut: 1604
+- Positive reads not reported by ROCkOut: 23
+- Positive read count from hmmsearch: 1479
+- Positive reads not aligned by hmmsearch: 148
 
-![MCR Test Set Scoring results](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/01_mcr/00_figures/04b-mcrMockMetaScores.png)
+#### lnuB/G - 100 bp reads
+- Positive read count from metagenome: 1643
+- Positive read count from Diamond/BlastX alignment: 1605
+- Positive reads not aligned by BlastX: 38
+- Positive read count from ROCkOut: 1605
+- Positive reads not reported by ROCkOut: 38
+- Positive read count from hmmsearch: 1335
+- Positive reads not aligned by hmmsearch: 308
+
+#### lnuB/G - 150 bp reads
+- Positive read count from metagenome: 1187
+- Positive read count from Diamond/BlastX alignment: 1146
+- Positive reads not aligned by BlastX: 41
+- Positive read count from ROCkOut: 1146
+- Positive reads not reported by ROCkOut: 41
+- Positive read count from hmmsearch: 1028
+- Positive reads not aligned by hmmsearch: 159
+
+#### lnuB/G - 250 bp reads
+- Positive read count from metagenome: 793
+- Positive read count from Diamond/BlastX alignment: 757
+- Positive reads not aligned by BlastX: 36
+- Positive read count from ROCkOut: 757
+- Positive reads not reported by ROCkOut: 36
+- Positive read count from hmmsearch: 666
+- Positive reads not aligned by hmmsearch: 127
+
+#### lnuB/G - 300 bp reads
+- Positive read count from metagenome: 626
+- Positive read count from Diamond/BlastX alignment: 606
+- Positive reads not aligned by BlastX: 20
+- Positive read count from ROCkOut: 606
+- Positive reads not reported by ROCkOut: 20
+- Positive read count from hmmsearch: 574
+- Positive reads not aligned by hmmsearch: 52
+
+![lnu Test Set Scoring results](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/04_lnu/00_figures/04b-lnuMockMetaScores.png)
+
+Top panel is for the lnu all model, middle panel is for the lnuF model, and bottom panel is for the lnuB/G model.
 
 ### d. Build pie trees with pplacer and itol.
 
 ROCkOut already includes the pie tree output with its "place" function. This step is really just retrieve the right file and using the [iTol](https://itol.embl.de/) website.
 
-##### Read placement tree for mcr All model.
+##### Read placement tree for lnu All model.
 
-![Read placement tree for mcr All model](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/01_mcr/00_figures/04c-mcrall-phylo-placement.png)
+![Read placement tree for lnu All model](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/04_lnu/00_figures/04c-lnuall-phylo-placement.png)
 
-##### Read placement tree for mcr 1 model.
+##### Read placement tree for lnuF model.
 
-![Read placement tree for mcr 1 model](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/01_mcr/00_figures/04d-mcr1-phylo-placement.png)
+![Read placement tree for lnuF model](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/04_lnu/00_figures/04d-lnuF-phylo-placement.png)
 
-### e. Positive read count sanity check
+##### Read placement tree for lnuB/G model.
 
-This section was performed during the development of ROCkOut but may still serve useful those with extra curiosity.
-
-blast, diamond, and hmm align fewer reads than rocker labels as positive during
-the read simulation step.
-
-The purpose of this script is to investigate that.
-
-It plots histograms for the simulated reads labeled as positive split between reads that align and read reads that do not align by blastx or hmm or don't pass the rocker filter.
-
-I just show results for the lnuAll model here, but the results were and can be repeated with lnuF or any other model.
-
-```bash
-python 00_scripts/investigate_pos_read_discrepancy.py -mm ../01b_lnuAll_test/simulated_reads/simread_100_raw_reads.fasta -bx test_score_100/alignments/simread_100_raw_reads.fasta_ROCkOut_alignments.txt -hm test_score_100/lnuAll-final_hmmSearch_100_filtered.tsv -rp test_score_100/ROCkOut_passing_alignments/simread_100_raw_reads.ROCkOut_passing.txt -rf test_score_100/ROCkOut_failing_alignments/simread_100_raw_reads.ROCkOut_failing.txt -o test_score_100/pos_read_test_100
-
-python 00_scripts/investigate_pos_read_discrepancy.py -mm ../01b_lnuAll_test/simulated_reads/simread_150_raw_reads.fasta -bx test_score_150/alignments/simread_150_raw_reads.fasta_ROCkOut_alignments.txt -hm test_score_150/lnuAll-final_hmmSearch_150_filtered.tsv -rp test_score_150/ROCkOut_passing_alignments/simread_150_raw_reads.ROCkOut_passing.txt -rf test_score_150/ROCkOut_failing_alignments/simread_150_raw_reads.ROCkOut_failing.txt -o test_score_150/pos_read_test_150
-
-python 00_scripts/investigate_pos_read_discrepancy.py -mm ../01b_lnuAll_test/simulated_reads/simread_250_raw_reads.fasta -bx test_score_250/alignments/simread_250_raw_reads.fasta_ROCkOut_alignments.txt -hm test_score_250/lnuAll-final_hmmSearch_250_filtered.tsv -rp test_score_250/ROCkOut_passing_alignments/simread_250_raw_reads.ROCkOut_passing.txt -rf test_score_250/ROCkOut_failing_alignments/simread_250_raw_reads.ROCkOut_failing.txt -o test_score_250/pos_read_test_250
-
-python 00_scripts/00c_scripts/investigate_pos_read_discrepancy.py -mm ../01b_lnuAll_test/simulated_reads/simread_300_raw_reads.fasta -bx test_score_300/alignments/simread_300_raw_reads.fasta_ROCkOut_alignments.txt -hm test_score_300/lnuAll-final_hmmSearch_300_filtered.tsv -rp test_score_300/ROCkOut_passing_alignments/simread_300_raw_reads.ROCkOut_passing.txt -rf test_score_300/ROCkOut_failing_alignments/simread_300_raw_reads.ROCkOut_failing.txt -o test_score_300/pos_read_test_300
-```
-
-**Results:**
-
-#### lnuAll - 100 bp reads
-- Total Positives reads created: 42985
-- Total reads not aligned: 3271
-- Total reads not in rocker filter output: 3271
-- Total reads not in hmm search results: 16905
-
-#### lnuAll - 150 bp reads
-- Total Positives reads created: 29734
-- Total reads not aligned: 1883
-- Total reads not in rocker filter output: 1883
-- Total reads not in hmm search results: 6230
-
-#### lnuAll - 250 bp reads
-- Total Positives reads created: 19185
-- Total reads not aligned: 1066
-- Total reads not in rocker filter output: 1066
-- Total reads not in hmm search results: 2634
-
-#### lnuAll - 300 bp reads
-- Total Positives reads created: 16227
-- Total reads not aligned: 741
-- Total reads not in rocker filter output: 741
-- Total reads not in hmm search results: 1910
-
-There are plots too. I'll put some examples. This section and plots have mainly been to double check ROCkOut and track down discrepencies ect. during development.
+![Read placement tree for lnuB/G model](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/04_lnu/00_figures/04e-lnuBG-phylo-placement.png)
 
 ### f. Verify TP FP TN FN labels and scoring analysis (additional visuals)
 
@@ -865,13 +975,13 @@ I just show results for the lnuAll model here, but the results were and can be r
 > python ../../00c_scripts/ROCkOut_filter_visualize.py -p test_score_300/ROCkOut_passing_alignments/simread_300_raw_reads.ROCkOut_passing.txt -f test_score_300/ROCkOut_failing_alignments/simread_300_raw_reads.ROCkOut_failing.txt -o test_score_300/ROCkOut_Filter_Viz_300 -a test_score_300/alignments/simread_300_raw_reads.fasta_ROCkOut_alignments.txt
 ```
 
-##### mcr All model read mapping and classification for bitscore.
+##### lnu All model read mapping and classification for bitscore.
 
-![mcr All model read mapping and classification for bitscore](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/01_mcr/00_figures/04e_verify_bitscore.png)
+![lnu All model read mapping and classification for bitscore](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/04_lnu/00_figures/04f_verify_bitscore.png)
 
-##### mcr All model read mapping and classification for percent sequence identity.
+##### lnu All model read mapping and classification for percent sequence identity.
 
-![mcr All model read mapping and classification for percent sequence identity](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/01_mcr/00_figures/04f_verify_pid.png)
+![lnu All model read mapping and classification for percent sequence identity](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/04_lnu/00_figures/04g_verify_pid.png)
 
 
 

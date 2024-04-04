@@ -467,7 +467,7 @@ sbatch --export odir=model,pos=mphA_test_pos.txt,neg=mphA_test_neg.txt /ROCkOut/
 
 ![mph ROCker Models](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/02_mph/00_figures/04a-mph-ROCker-model-250bp.png)
 
-Top panel (A) is the ROCker model for the training set. This is the primary model used. Bottom panel (B) is the ROCker model for the testing set. The testing set is used to build a simulated short read data set to challenge the training set emulating real word metagenome data.
+Top panel (A) is the ROCker model for the mph all gene set. Bottom panel (B) is the ROCker model for the mphA gene set.
 
 # Step 05: Test ROCker models
 
@@ -743,11 +743,11 @@ Top panel is for the mph all model and bottom panel is for the mphA model.
 
 ROCkOut already includes the pie tree output with its "place" function. This step is really just retrieve the right file and using the [iTol](https://itol.embl.de/) website.
 
-##### Read placement tree for mcr All model.
+##### Read placement tree for mph All model.
 
 ![Read placement tree for mph All model](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/02_mph/00_figures/04c-mphall-phylo-placement.png)
 
-##### Read placement tree for mcr 1 model.
+##### Read placement tree for mphA model.
 
 ![Read placement tree for mphA model](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/02_mph/00_figures/04d-mphA-phylo-placement.png)
 
@@ -773,13 +773,13 @@ I just show results for the mphAll model here, but the results were and can be r
 > python ../../00c_scripts/ROCkOut_filter_visualize.py -p test_score_300/ROCkOut_passing_alignments/simread_300_raw_reads.ROCkOut_passing.txt -f test_score_300/ROCkOut_failing_alignments/simread_300_raw_reads.ROCkOut_failing.txt -o test_score_300/ROCkOut_Filter_Viz_300 -a test_score_300/alignments/simread_300_raw_reads.fasta_ROCkOut_alignments.txt
 ```
 
-##### mcr All model read mapping and classification for bitscore.
+##### lnu All model read mapping and classification for bitscore.
 
-![mcr All model read mapping and classification for bitscore](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/02_mph/00_figures/04e_verify_bitscore.png)
+![lnu All model read mapping and classification for bitscore](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/02_mph/00_figures/04e_verify_bitscore.png)
 
-##### mcr All model read mapping and classification for percent sequence identity.
+##### lnu All model read mapping and classification for percent sequence identity.
 
-![mcr All model read mapping and classification for percent sequence identity](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/02_mph/00_figures/04f_verify_pid.png)
+![lnu All model read mapping and classification for percent sequence identity](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/02_mph/00_figures/04f_verify_pid.png)
 
 
 
