@@ -446,7 +446,9 @@ cd 02b_mcr1_test
 sbatch --export odir=model,pos=mcr1_test_pos.txt,neg=mcr1_test_neg.txt /ROCkOut/00b_sbatch/ROCkOut.sbatch
 ```
 
-![MCR ROCker Models](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/01_mcr/00_figures/04a-mcr-ROCker-model-250bp.png)
+![mcr ROCker Models](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/01_mcr/00_figures/04a-mcr-ROCker-model-250bp.png)
+
+Top panel (A) is the ROCker model for the training set. This is the primary model used. Bottom panel (B) is the ROCker model for the testing set. The testing set is used to build a simulated short read data set to challenge the training set emulating real word metagenome data.
 
 # Step 05: Test ROCker models
 
@@ -714,7 +716,9 @@ python 00_scripts/score_rocker_model.py -mm ../02b_mcr1_test/simulated_reads/sim
 - Positive read count from hmmsearch: 5089
 - Positive reads not aligned by hmmsearch: 571
 
-![MCR Test Set Scoring results](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/01_mcr/00_figures/04b-mcrMockMetaScores.png)
+![mcr Test Set Scoring results](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/01_mcr/00_figures/04b-mcrMockMetaScores.png)
+
+Top panel is for the mcr all model and bottom panel is for the mcr 1 model.
 
 ### d. Build pie trees with pplacer and itol.
 

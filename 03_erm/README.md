@@ -455,11 +455,34 @@ We make two similar similar selections for the *Testing set*:
 
 # Step 04: Build ROCker models
 
-*I don't have the final figures yet. Waiting on Kenji to finalize the ROCkOut code.*
-
-This is a paragraph about any modification to the input UniProt ID lists when building the ROCker model
-
 This is an iterative process of building a model, investigating the results, and tracking down all the peculiarities to arrive at a final postive and/or negative UniProt ID set.
+
+The erm genes are similar to the Ribosomal RNA small subunit methyltransferase A gene. The tree branches weren't fully stable between the testing set tree and the training set tree. In the testing set tree you can see clades 7 & 14 clearly together. In the training set tree clades 7 & 14 look to be split, but in other tree views I think it is clear that the erms have diverged from these. So for the ermAll model we are using clades 7 & 14 as the negative reference set and all other erm clades as the positive reference set.
+
+###### For ermAll testing set
+
+On the first iteration we had some non_target (orange) reads up with the positive target (blue) reads. Upon investigation we found these reads were from one genome CP013126 (Acidipropionibacterium acidipropionici strain CGMCC) that has a gene mapping to genes K7SP41 and A0A806VFT6 (both are genes in the positive reference set). This genome has one gene A0A806VFT6 in Clade 2 of the positive reference set and a second gene matching K7SP41 in genome CP003493 (Acidipropionibacterium acidipropionici ATCC 4875). It seems both genomes may have both copies. We removed K7SP41 from the analysis and added the gene ID from the CP013126 genome (A0A806VN60), but this didn't work because the genome may have a third depricated copy. So we removed both gene ID for this genome as well.
+
+#### For ErmB Training set
+
+ermB falls in the root clade 5 with several other erm genes. We built this model using clade 5 as the positive references and all other clades as the negative references.
+
+On the first iteration we had a few non_target (orange) reads up with the positive (blue) reads. Upon investigation we found that these reads appear to be from a single gene in genome LM997412 (Peptoniphilus sp. ING2-D1G) mapping to gene A0A1B2JLG7 (erm47). Genome LM997412 has gene A0A090I0Z6 (Ribosomal RNA small subunit methyltransferase A) in clade 14 (negative reference) and also gene A0A090HZ38 (Ribosomal RNA adenine dimethylase, ermGT). This is the only genome we found in are set that has both of these genes. The ermGT gene is 99.2% identical to A0A1B2JLG7 (erm47). Since we have plenty of genes already, we removed this genome from the analysis and rebuilt the model using rockout refine.
+
+On the second iteration we followed our decisions from the ermAll-fp model and reduced the number of reference sequences using the same reference sequences for the ermAll-fp model but using only the ermB clade 5 references as positive and all others as negative.
+
+##### ErmB Testing set
+
+On the first iteration we had some noise.
+
+1) Genes A0A0P0HVU9 and H3K0L6 in the postive reference set produced many low bitscore reads during model mapping and were removed from the analysis since we have sufficient gene representation without them.
+2) Genome LN680996 has gene A0A0D6DTT0 ended up in the negative reference list but it belongs to clade 5. Its annotated as erm45. We moved it from the negative reference list to the positive reference list. Posible human error when building the lists.
+3) Genome KY579372 is a plasmid with two erm genes. A0A1W7AEX5 (ermA) initially included in the positive reference set and A0A5A4WFU6 (ermB) showed up as a non_target because this gene ID was not included in the initial reference set. We added it to the positive reference set.
+4) Genome AB666466 has gene H3K0L6_STAAU () in the pos ref set and a second gene that maps to A0A5Q2TL81 (ermA) in the positive ref set. But see (1) above we removed H3K0L6 and so this not be an issue any longer.
+
+On the second iteration during model scoring we had 1 genome (KY579372 - actually its a plasmid) with a gene (A0A1W7AEX5_ENTFC) in the positive set that also has non_target reads scoring high bitscore and sequence identity and thus flagged as false positive (FP). These reads are not actually true false positives as they come from a second copy of similar sequence in the genome. We removed this gene and genome from the testing set since it created uneccessary noise and we have sufficient reference sequences already. 
+
+After making above changes we rebuilt the model using rockout refine.
 
 ```bash
 # ermAll model
@@ -487,13 +510,13 @@ cd 02b_ermB_test
 sbatch --export odir=model,pos=ermB_test_pos.txt,neg=ermB_test_neg.txt /ROCkOut/00b_sbatch/ROCkOut.sbatch
 ```
 
-**Results**
+![erm ROCker Models](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/03_erm/00_figures/04a-erm-ROCker-model-250bp.png)
 
-That's it. The models are built. I'll include final figures here once I have them.
-
-ROCkOut as an "-extract" feature that collects the labeled, simulated, short reads into fasta files. We will use these fasta files from the *Testing set* to execute ROCkOut's align, filter, and place functions against the *Training set* models.
+Top panel (A) is the ROCker model for the training set. This is the primary model used. Bottom panel (B) is the ROCker model for the testing set. The testing set is used to build a simulated short read data set to challenge the training set emulating real word metagenome data.
 
 # Step 05: Test ROCker models
+
+ROCkOut as an "-extract" feature that collects the labeled, simulated, short reads into fasta files. We will use these fasta files from the *Testing set* to execute ROCkOut's align, filter, and place functions against the *Training set* models.
 
 We build models for the *Testing set* because 1) this is a convenient way to use the ROCkOut figures and interactive plots to fine tune the sequence selection and 2) ROCkOut downloads genomes the genes are part of, simulates short sequence reads for the genomes, and labels the reads and positive, negative, target, or non_target. We can collect these reads into a mock metagenome that is labeled so we can track them and use them to score the results.
 
@@ -611,44 +634,44 @@ python 00_scripts/besthit_filter_hmm.py -i test_score_300/ermB-final_hmmSearch_3
 **Results:**
 
 #### ermAll - 100 bp reads
-- Total number of entries in hmm file: 27806
+- Total number of entries in hmm file: 9568
 - Number of duplicate hmm matches: 0
-- Number of best hit entries written to new file: 27806
+- Number of best hit entries written to new file: 9568
 
 #### ermAll - 150 bp reads
-- Total number of entries in hmm file: 26264
-- Number of duplicate hmm matches: 2
-- Number of best hit entries written to new file: 26262 
+- Total number of entries in hmm file: 12893
+- Number of duplicate hmm matches: 0
+- Number of best hit entries written to new file: 12893 
 
 #### ermAll - 250 bp reads
-- Total number of entries in hmm file: 19582
-- Number of duplicate hmm matches: 11
-- Number of best hit entries written to new file: 19571 
+- Total number of entries in hmm file: 12859
+- Number of duplicate hmm matches: 0
+- Number of best hit entries written to new file: 12859 
 
 #### ermAll - 300 bp reads
-- Total number of entries in hmm file: 17942
-- Number of duplicate hmm matches: 13
-- Number of best hit entries written to new file: 17929
+- Total number of entries in hmm file: 13448
+- Number of duplicate hmm matches: 7
+- Number of best hit entries written to new file: 13441
 
 #### ermB - 100 bp reads
-- Total number of entries in hmm file: 16628
+- Total number of entries in hmm file: 23330
 - Number of duplicate hmm matches: 0
-- Number of best hit entries written to new file: 16628
+- Number of best hit entries written to new file: 23330
 
 #### ermB - 150 bp reads
-- Total number of entries in hmm file: 17457
-- Number of duplicate hmm matches: 2
-- Number of best hit entries written to new file: 17455
+- Total number of entries in hmm file: 30304
+- Number of duplicate hmm matches: 0
+- Number of best hit entries written to new file: 30304
 
 #### ermB - 250 bp reads
-- Total number of entries in hmm file: 13195
-- Number of duplicate hmm matches: 0
-- Number of best hit entries written to new file: 13195
+- Total number of entries in hmm file: 28211
+- Number of duplicate hmm matches: 17
+- Number of best hit entries written to new file: 28194
 
 #### ermB - 300 bp reads
-- Total number of entries in hmm file: 11702
-- Number of duplicate hmm matches: 4
-- Number of best hit entries written to new file: 11698 
+- Total number of entries in hmm file: 29510
+- Number of duplicate hmm matches: 40
+- Number of best hit entries written to new file: 29470
 
 ### c. Compile, score, and plot results
 
@@ -686,78 +709,80 @@ python 00_scripts/score_rocker_model.py -mm ../02b_ermB_test/simulated_reads/sim
 **Results:**
 
 #### ermAll - 100 bp reads
-- Positive read count from metagenome: 42985
-- Positive read count from Diamond/BlastX alignment: 39714
-- Positive reads not aligned by BlastX: 3271
-- Positive read count from ROCkOut: 39714
-- Positive reads not reported by ROCkOut: 3271
-- Positive read count from hmmsearch: 26080
-- Positive reads not aligned by hmmsearch: 16905
+- Positive read count from metagenome: 12073
+- Positive read count from Diamond/BlastX alignment: 11626
+- Positive reads not aligned by BlastX: 447
+- Positive read count from ROCkOut: 11626
+- Positive reads not reported by ROCkOut: 447
+- Positive read count from hmmsearch: 6059
+- Positive reads not aligned by hmmsearch: 6014
 
 #### ermAll - 150 bp reads
-- Positive read count from metagenome: 29734
-- Positive read count from Diamond/BlastX alignment: 27851
-- Positive reads not aligned by BlastX: 1883
-- Positive read count from ROCkOut: 27851
-- Positive reads not reported by ROCkOut: 1883
-- Positive read count from hmmsearch: 23504
-- Positive reads not aligned by hmmsearch: 6230
+- Positive read count from metagenome: 8658
+- Positive read count from Diamond/BlastX alignment: 8269
+- Positive reads not aligned by BlastX: 389
+- Positive read count from ROCkOut: 8269
+- Positive reads not reported by ROCkOut: 389
+- Positive read count from hmmsearch: 6120
+- Positive reads not aligned by hmmsearch: 2538
 
 #### ermAll - 250 bp reads
-- Positive read count from metagenome: 19185
-- Positive read count from Diamond/BlastX alignment: 18119
-- Positive reads not aligned by BlastX: 1066
-- Positive read count from ROCkOut: 18119
-- Positive reads not reported by ROCkOut: 1066
-- Positive read count from hmmsearch: 16551
-- Positive reads not aligned by hmmsearch: 2634
+- Positive read count from metagenome: 5977
+- Positive read count from Diamond/BlastX alignment: 5660
+- Positive reads not aligned by BlastX: 317
+- Positive read count from ROCkOut: 5660
+- Positive reads not reported by ROCkOut: 317
+- Positive read count from hmmsearch: 4520
+- Positive reads not aligned by hmmsearch: 1457
 
 #### ermAll - 300 bp reads
-- Positive read count from metagenome: 16227
-- Positive read count from Diamond/BlastX alignment: 15486
-- Positive reads not aligned by BlastX: 741
-- Positive read count from ROCkOut: 15486
-- Positive reads not reported by ROCkOut: 741
-- Positive read count from hmmsearch: 14317
-- Positive reads not aligned by hmmsearch: 1910
+- Positive read count from metagenome: 5039
+- Positive read count from Diamond/BlastX alignment: 4842
+- Positive reads not aligned by BlastX: 197
+- Positive read count from ROCkOut: 4842
+- Positive reads not reported by ROCkOut: 197
+- Positive read count from hmmsearch: 4071
+- Positive reads not aligned by hmmsearch: 968
 
 #### ermB - 100 bp reads
-- Positive read count from metagenome: 15548
-- Positive read count from Diamond/BlastX alignment: 15396
-- Positive reads not aligned by BlastX: 152
-- Positive read count from ROCkOut: 15396
-- Positive reads not reported by ROCkOut: 152
-- Positive read count from hmmsearch: 8633
-- Positive reads not aligned by hmmsearch: 6915
+- Positive read count from metagenome: 5207
+- Positive read count from Diamond/BlastX alignment: 4167
+- Positive reads not aligned by BlastX: 1040
+- Positive read count from ROCkOut: 4167
+- Positive reads not reported by ROCkOut: 1040
+- Positive read count from hmmsearch: 2418
+- Positive reads not aligned by hmmsearch: 2789
 
 #### ermB - 150 bp reads
-- Positive read count from metagenome: 10724
-- Positive read count from Diamond/BlastX alignment: 10622
-- Positive reads not aligned by BlastX: 102
-- Positive read count from ROCkOut: 10622
-- Positive reads not reported by ROCkOut: 102
-- Positive read count from hmmsearch: 8751
-- Positive reads not aligned by hmmsearch: 1973
+- Positive read count from metagenome: 3683
+- Positive read count from Diamond/BlastX alignment: 3149
+- Positive reads not aligned by BlastX: 534
+- Positive read count from ROCkOut: 3149
+- Positive reads not reported by ROCkOut: 534
+- Positive read count from hmmsearch: 2568
+- Positive reads not aligned by hmmsearch: 1115
 
 #### ermB - 250 bp reads
-- Positive read count from metagenome: 6698
-- Positive read count from Diamond/BlastX alignment: 6599
-- Positive reads not aligned by BlastX: 99
-- Positive read count from ROCkOut: 6599
-- Positive reads not reported by ROCkOut: 99
-- Positive read count from hmmsearch: 5835
-- Positive reads not aligned by hmmsearch: 863
+- Positive read count from metagenome: 2470
+- Positive read count from Diamond/BlastX alignment: 2169
+- Positive reads not aligned by BlastX: 301
+- Positive read count from ROCkOut: 2169
+- Positive reads not reported by ROCkOut: 301
+- Positive read count from hmmsearch: 1871
+- Positive reads not aligned by hmmsearch: 599
 
 #### ermB - 300 bp reads
-- Positive read count from metagenome: 5660
-- Positive read count from Diamond/BlastX alignment: 5593
-- Positive reads not aligned by BlastX: 67
-- Positive read count from ROCkOut: 5593
-- Positive reads not reported by ROCkOut: 67
-- Positive read count from hmmsearch: 5089
-- Positive reads not aligned by hmmsearch: 571
+- Positive read count from metagenome: 2073
+- Positive read count from Diamond/BlastX alignment: 1882
+- Positive reads not aligned by BlastX: 191
+- Positive read count from ROCkOut: 1882
+- Positive reads not reported by ROCkOut: 191
+- Positive read count from hmmsearch: 1718
+- Positive reads not aligned by hmmsearch: 355
 
-![MCR Test Set Scoring results](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/01_mcr/00_figures/04b-mcrMockMetaScores.png)
+![erm Test Set Scoring results](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/03_erm/00_figures/04b-ermMockMetaScores.png)
+
+Top panel is for the erm all model and bottom panel is for the ermB model.
 
 ### d. Build pie trees with pplacer and itol.
 
@@ -765,64 +790,13 @@ ROCkOut already includes the pie tree output with its "place" function. This ste
 
 ##### Read placement tree for mcr All model.
 
-![Read placement tree for mcr All model](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/01_mcr/00_figures/04c-mcrall-phylo-placement.png)
+![Read placement tree for mcr All model](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/03_erm/00_figures/04c-ermall-phylo-placement.png)
 
 ##### Read placement tree for mcr 1 model.
 
-![Read placement tree for mcr 1 model](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/01_mcr/00_figures/04d-mcr1-phylo-placement.png)
+![Read placement tree for mcr 1 model](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/03_erm/00_figures/04d-ermB-phylo-placement.png)
 
-### e. Positive read count sanity check
-
-This section was performed during the development of ROCkOut but may still serve useful those with extra curiosity.
-
-blast, diamond, and hmm align fewer reads than rocker labels as positive during
-the read simulation step.
-
-The purpose of this script is to investigate that.
-
-It plots histograms for the simulated reads labeled as positive split between reads that align and read reads that do not align by blastx or hmm or don't pass the rocker filter.
-
-I just show results for the ermAll model here, but the results were and can be repeated with ermB or any other model.
-
-```bash
-python 00_scripts/investigate_pos_read_discrepancy.py -mm ../01b_ermAll_test/simulated_reads/simread_100_raw_reads.fasta -bx test_score_100/alignments/simread_100_raw_reads.fasta_ROCkOut_alignments.txt -hm test_score_100/ermAll-final_hmmSearch_100_filtered.tsv -rp test_score_100/ROCkOut_passing_alignments/simread_100_raw_reads.ROCkOut_passing.txt -rf test_score_100/ROCkOut_failing_alignments/simread_100_raw_reads.ROCkOut_failing.txt -o test_score_100/pos_read_test_100
-
-python 00_scripts/investigate_pos_read_discrepancy.py -mm ../01b_ermAll_test/simulated_reads/simread_150_raw_reads.fasta -bx test_score_150/alignments/simread_150_raw_reads.fasta_ROCkOut_alignments.txt -hm test_score_150/ermAll-final_hmmSearch_150_filtered.tsv -rp test_score_150/ROCkOut_passing_alignments/simread_150_raw_reads.ROCkOut_passing.txt -rf test_score_150/ROCkOut_failing_alignments/simread_150_raw_reads.ROCkOut_failing.txt -o test_score_150/pos_read_test_150
-
-python 00_scripts/investigate_pos_read_discrepancy.py -mm ../01b_ermAll_test/simulated_reads/simread_250_raw_reads.fasta -bx test_score_250/alignments/simread_250_raw_reads.fasta_ROCkOut_alignments.txt -hm test_score_250/ermAll-final_hmmSearch_250_filtered.tsv -rp test_score_250/ROCkOut_passing_alignments/simread_250_raw_reads.ROCkOut_passing.txt -rf test_score_250/ROCkOut_failing_alignments/simread_250_raw_reads.ROCkOut_failing.txt -o test_score_250/pos_read_test_250
-
-python 00_scripts/00c_scripts/investigate_pos_read_discrepancy.py -mm ../01b_ermAll_test/simulated_reads/simread_300_raw_reads.fasta -bx test_score_300/alignments/simread_300_raw_reads.fasta_ROCkOut_alignments.txt -hm test_score_300/ermAll-final_hmmSearch_300_filtered.tsv -rp test_score_300/ROCkOut_passing_alignments/simread_300_raw_reads.ROCkOut_passing.txt -rf test_score_300/ROCkOut_failing_alignments/simread_300_raw_reads.ROCkOut_failing.txt -o test_score_300/pos_read_test_300
-```
-
-**Results:**
-
-#### ermAll - 100 bp reads
-- Total Positives reads created: 42985
-- Total reads not aligned: 3271
-- Total reads not in rocker filter output: 3271
-- Total reads not in hmm search results: 16905
-
-#### ermAll - 150 bp reads
-- Total Positives reads created: 29734
-- Total reads not aligned: 1883
-- Total reads not in rocker filter output: 1883
-- Total reads not in hmm search results: 6230
-
-#### ermAll - 250 bp reads
-- Total Positives reads created: 19185
-- Total reads not aligned: 1066
-- Total reads not in rocker filter output: 1066
-- Total reads not in hmm search results: 2634
-
-#### ermAll - 300 bp reads
-- Total Positives reads created: 16227
-- Total reads not aligned: 741
-- Total reads not in rocker filter output: 741
-- Total reads not in hmm search results: 1910
-
-There are plots too. I'll put some examples. This section and plots have mainly been to double check ROCkOut and track down discrepencies ect. during development.
-
-### f. Verify TP FP TN FN labels and scoring analysis (additional visuals)
+### e. Verify TP FP TN FN labels and scoring analysis (additional visuals)
 
 The score_rocker_model.py script writes out a fasta directory with file names labeled for filter method and failed, passed, TP, FP, TN, or FN.
 
@@ -846,11 +820,11 @@ I just show results for the ermAll model here, but the results were and can be r
 
 ##### mcr All model read mapping and classification for bitscore.
 
-![mcr All model read mapping and classification for bitscore](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/01_mcr/00_figures/04e_verify_bitscore.png)
+![mcr All model read mapping and classification for bitscore](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/03_erm/00_figures/04e_verify_bitscore.png)
 
 ##### mcr All model read mapping and classification for percent sequence identity.
 
-![mcr All model read mapping and classification for percent sequence identity](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/01_mcr/00_figures/04f_verify_pid.png)
+![mcr All model read mapping and classification for percent sequence identity](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/03_erm/00_figures/04f_verify_pid.png)
 
 
 
