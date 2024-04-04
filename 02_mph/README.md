@@ -745,7 +745,7 @@ ROCkOut already includes the pie tree output with its "place" function. This ste
 
 ##### Read placement tree for mcr 1 model.
 
-![Read placement tree for mcr 1 model](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/02_mph/00_figures/04d-mph-phylo-placement.png)
+![Read placement tree for mcr 1 model](https://github.com/rotheconrad/ROCker_Macrolide_Models/blob/main/02_mph/00_figures/04d-mphA-phylo-placement.png)
 
 ### e. Verify TP FP TN FN labels and scoring analysis (additional visuals)
 
