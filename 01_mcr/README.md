@@ -395,16 +395,18 @@ This is an iterative process of building a model, investigating the results, and
 
 ##### During model testing with mock metagenome we found some borderline genes leading to high false negative rate in the model. We moved the following uniprot IDs from the testing set to the training set. They are associated with 5 genomes.
 
-A0A0P7C4N1_PSEPU
-A0A6S5TUK3_PSEPU
-A0A2S2CBM0_9GAMM
-A0A2Z4PQG0_9GAMM
-A0A2Z4PX90_9GAMM
-A0A1Z2SKS1_VIBGA
-A0A1Z2SLK4_VIBGA
-A0A2S0PCW0_9NEIS
+- A0A0P7C4N1_PSEPU
+- A0A6S5TUK3_PSEPU
+- A0A2S2CBM0_9GAMM
+- A0A2Z4PQG0_9GAMM
+- A0A2Z4PX90_9GAMM
+- A0A1Z2SKS1_VIBGA
+- A0A1Z2SLK4_VIBGA
+- A0A2S0PCW0_9NEIS
 
 ##### from 01a_mcrAll_train directory
+
+```bash
 mv ../01b_mcrAll_test/model/positive/A0A0P7C4N1_PSEPU/ model/positive/
 mv ../01b_mcrAll_test/model/positive/A0A6S5TUK3_PSEPU/ model/positive/
 mv ../01b_mcrAll_test/model/positive/A0A2S2CBM0_9GAMM/ model/positive/
@@ -413,10 +415,10 @@ mv ../01b_mcrAll_test/model/positive/A0A2Z4PX90_9GAMM/ model/positive/
 mv ../01b_mcrAll_test/model/positive/A0A1Z2SKS1_VIBGA/ model/positive/
 mv ../01b_mcrAll_test/model/positive/A0A1Z2SLK4_VIBGA/ model/positive/
 mv ../01b_mcrAll_test/model/positive/A0A2S0PCW0_9NEIS/ model/positive/
+```
 
-
-Finally, we chose the FP+ setting with ROCkOut refine.
-parameter -c fp+
+*Finally, we chose the FP+ setting with ROCkOut refine.
+parameter -c fp+*
 
 ```bash
 # mcrAll model
